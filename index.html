@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-LP81OFct2AfanHHf2gpwfrSyQUwcEG3MvBmLWAyFnz0=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-tko7v7N9QYkvGTrstp4eRm/j1ZnrI5Zwql+QBbA3XSA='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-OLGdA2ilkaak9ttIir1Z3Kg3m64Bugd8K3vUGdNj0K4=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-9rt1bRLM17fedN1VvILcxvwBeCM3sJeBpsit4SutxLc='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light">
@@ -14220,6 +14220,7 @@ function renderCivi(e, it, out) {
 
 const cache = new Map();
 function render(it, px) {
+  if (!['f', 'h', 'n', 'u'].includes(it.a)) it = Object.assign({}, it, { a: 'f' });
   const e = BY[it.k] || BY.inf;
   const key = JSON.stringify([it.k, it.a, it.o, it.n, it.l, it.h, it.j, it.f, it.c, px]);
   const hit = cache.get(key);
@@ -14810,7 +14811,18 @@ function load() {
     s = { plans: { [p.id]: p }, cur: p.id, prefs: {} };
   }
   for (const id in s.plans) s.plans[id].items = (s.plans[id].items || []).map(migrateItem);
-  s.prefs = Object.assign({ size: 'm', base: 'map', tool: 'free', color: 'b', idn: 'f', cat: 'form', recent: [], tools: ['free', 'arrow', 'boundary', 'move', 'attsec', 'fan:obs', 'fan:p'] }, s.prefs);
+  const DEF_TOOLS = ['free', 'arrow', 'boundary', 'move', 'attsec', 'fan:obs', 'fan:p'];
+  const P = s.prefs = Object.assign({ size: 'm', base: 'map', tool: 'free', color: 'b', idn: 'f', cat: 'form', recent: [], tools: DEF_TOOLS }, s.prefs);
+  /* réglages hérités de la première version ou abîmés : on les remet d'aplomb */
+  const okTool = k => typeof k === 'string' && (k.startsWith('fan:') ? !!FANS[k.slice(4)] : !!DECO.BYK[k]);
+  if (!['f', 'h', 'n', 'u'].includes(P.idn)) P.idn = { 3: 'f', 6: 'h', 1: 'u', 4: 'n' }[P.idn] || 'f';
+  if (!okTool(P.tool)) P.tool = 'free';
+  P.tools = (Array.isArray(P.tools) ? P.tools : []).filter(okTool);
+  if (!P.tools.length) P.tools = DEF_TOOLS.slice();
+  if (!CATS.some(c => c[0] === P.cat)) P.cat = 'form';
+  P.recent = (Array.isArray(P.recent) ? P.recent : []).filter(x => x && (x.lib === 'nato' ? NATO_BY[x.b] : CH.BY[x.k]));
+  if (!COLS.includes(P.color)) P.color = 'b';
+  if (!SIZES[P.size]) P.size = 'm';
   if (!s.plans[s.cur]) s.cur = Object.keys(s.plans)[0];
   return s;
 }
@@ -14910,7 +14922,9 @@ function render() {
   updateUndo();
 }
 function addSymbol(it, size) {
-  const s = symRender(it, size), on = it.id === sel;
+  let s;
+  try { s = symRender(it, size); } catch (e) { return; }
+  const on = it.id === sel;
   const m = L.marker([it.lat, it.lng], {
     icon: L.divIcon({ className: 'sym' + (on ? ' sel' : ''), html: s.svg, iconSize: [s.w, s.h], iconAnchor: [s.ax, s.ay] }),
     draggable: on && mode === 'idle', keyboard: false, riseOnHover: true, autoPan: true,
@@ -15401,7 +15415,8 @@ async function copyText(t, msg) {
 function chSpec(k) { const e = CH.BY[k]; return { lib: 'ch', k, a: store.prefs.idn, o: Object.assign({}, e && e.x.o) }; }
 function natoSpec(base) { return { lib: 'nato', b: base, a: store.prefs.idn, sidc: natoSidc(base, store.prefs.idn) }; }
 function tileFor(spec, label) {
-  const r = symRender(spec.lib === 'nato' ? { lib: 'nato', sidc: spec.sidc } : spec, 34);
+  let r;
+  try { r = symRender(spec.lib === 'nato' ? { lib: 'nato', sidc: spec.sidc } : spec, 34); } catch (e) { return null; }
   const b = h('button', { type: 'button', class: 'tile' }, h('div', { class: 'ic', html: r.svg }), h('span', { text: label }));
   b.addEventListener('click', () => startPlace(spec));
   return b;
