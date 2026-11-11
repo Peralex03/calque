@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-l00g5zyIpgI42I2ni0s4HyqFhu3prAyWjO/Pu0vIrzc=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-uZMiZWdUKNBXUIWFQviHiPjgh3C7dzJdBXyAsCAsm10=' 'sha256-pNvg+hyYJuFXyxhfGA0E/OleLDLU2W0Ykb8c0o0Zm1E='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch https://wms.geo.admin.ch https://api3.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-l00g5zyIpgI42I2ni0s4HyqFhu3prAyWjO/Pu0vIrzc=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-uZMiZWdUKNBXUIWFQviHiPjgh3C7dzJdBXyAsCAsm10=' 'sha256-e03Ll925d6ZsptumiBUgRbiSjI2Sr9Bah8eFt4KTTME='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch https://wms.geo.admin.ch https://api3.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
@@ -1000,8 +1000,19 @@ input[type=time].field{color-scheme:dark}
 .mt .mtr.head{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:8px 16px}
 .mt .mtr span:not(:first-child),.mt .mtr b+span{text-align:right}
 .mt .mtr b{font-weight:600}
-.lgimg{padding:6px 16px 12px;background:var(--card)}
-.lgimg img{max-width:100%;border-radius:8px;background:#fff;padding:6px}
+.lgimg{position:relative;padding:2px 16px 14px;background:var(--card)}
+.tleg{display:flex;flex-direction:column;gap:2px}
+.tlhead{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+.tlrow{display:flex;align-items:center;gap:12px;padding:5px 0}
+.tlsw{flex:none;width:52px;height:28px;border-radius:7px;background:var(--thumb);display:grid;place-items:center}
+.tlsw svg{display:block}
+.tlt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.tlt b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.tlt small{font-size:13px;color:var(--muted)}
+.tlnote{margin:8px 0 0;font-size:12.5px;color:var(--muted);line-height:1.4}
+.lgtank{display:flex;flex-direction:column;gap:4px;margin-bottom:2px}
+.lgsw{flex:none;width:34px;height:16px;border-radius:4px;background:var(--thumb);display:grid;place-items:center;font-style:normal}
+.lgsw svg{width:30px;height:12px}
 
 /* --- mode itinéraire : points en haut, résumé en bas --- */
 body.routing .top,body.routing #cross{display:none}
@@ -17077,12 +17088,36 @@ const rRend = L.svg({ pane: 'route', padding: 0.5 });
 const accRend = L.canvas({ pane: 'route', padding: 0.3 });
 const routeLayer = L.layerGroup().addTo(map), pinLayer = L.layerGroup().addTo(map), accLayer = L.layerGroup().addTo(map);
 const WMS = {
-  tank: { n: 'Itinéraires de déplacement des chars', sub: 'VBS, publication partielle', layer: 'ch.vbs.panzerverschiebungsrouten', legend: 'https://api3.geo.admin.ch/static/images/legends/ch.vbs.panzerverschiebungsrouten_fr.png' },
+  tank: { n: 'Itinéraires de déplacement des chars', sub: 'VBS, publication partielle', layer: 'ch.vbs.panzerverschiebungsrouten', legend: () => tankLegend(false), mini: () => tankLegend(true) },
   zones: { n: 'Zones interdites et dangereuses', sub: 'VBS', layer: 'ch.vbs.sperr-gefahrenzonenkarte' },
   tir: { n: 'Avis de tir publiés', sub: 'VBS, zones de danger', layer: 'ch.vbs.schiessanzeigen' },
   roads: { n: 'Réseau routier swissTLM3D', sub: 'swisstopo', layer: 'ch.swisstopo.swisstlm3d-strassen' },
 };
 const wmsOn = {};
+/* légende des itinéraires des chars, redessinée d'après la légende officielle du VBS */
+const TANK_LINES = [
+  ['P1 · 27,5 t', 'Autorisation par la place d’armes', '#7A3FC8', 'dash'],
+  ['P1 · 57,5 t', 'Autorisation par la place d’armes', '#7A3FC8', 'solid'],
+  ['P2 · 27,5 t', 'Autorisation par l’OCRNA', '#8A5A3B', 'dash'],
+  ['P2 · 57,5 t', 'Autorisation par l’OCRNA', '#8A5A3B', 'solid'],
+  ['P2 · 57 t ou P1 · 27 t', 'Autorisation par l’OCRNA ou par la place d’armes', '#2F6BFF', 'dot'],
+];
+const TANK_PTS = [['#3DAA4E', 'Poids effectif autorisé'], ['#F2A33A', 'Non passable en même temps'], ['#E5322D', 'Centre de la route']];
+const lineSw = (col, st) => `<svg width="40" height="14" viewBox="0 0 40 14" aria-hidden="true"><path d="M4 7H36" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="${st === 'dot' ? 'round' : 'butt'}"${st === 'dash' ? ' stroke-dasharray="7 4"' : st === 'dot' ? ' stroke-dasharray="0.1 6.5"' : ''}/></svg>`;
+const ringSw = col => `<svg width="40" height="20" viewBox="0 0 40 20" aria-hidden="true"><circle cx="20" cy="10" r="7" fill="none" stroke="${col}" stroke-width="3"/></svg>`;
+function tankLegend(mini) {
+  if (mini) {
+    const box = h('div', { class: 'lgtank' });
+    for (const [t, , c, st] of TANK_LINES) box.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgsw', html: lineSw(c, st) }), h('span', { text: t })));
+    for (const [c, t] of TANK_PTS) box.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgsw', html: ringSw(c) }), h('span', { text: t })));
+    return box;
+  }
+  const row = (sw, t, sub) => h('div', { class: 'tlrow' }, h('i', { class: 'tlsw', html: sw }), h('div', { class: 'tlt' }, h('b', { text: t }), sub ? h('small', { text: sub }) : null));
+  return h('div', { class: 'tleg' },
+    h('div', { class: 'tlhead', text: 'Itinéraires' }), ...TANK_LINES.map(([t, sub, c, st]) => row(lineSw(c, st), t, sub)),
+    h('div', { class: 'tlhead', text: 'Points' }), ...TANK_PTS.map(([c, t]) => row(ringSw(c), t)),
+    h('p', { class: 'tlnote', text: 'P1, P2 : catégories d’itinéraire. Tonnages : poids effectif maximal.' }));
+}
 function syncWms() {
   for (const k in WMS) {
     const want = !!RP().layers[k];
@@ -17172,7 +17207,10 @@ function updLegend(msg) {
     body.append(h('div', { class: 'lgsub', text: 'Pour ' + cDesc(rConstraints()) }));
     RLAB.forEach((t, i) => body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline', style: `background:${RCOL[i]}` }), h('span', { text: t }))));
   }
-  for (const k in WMS) if (L2[k]) body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline wms' }), h('span', { text: WMS[k].n })));
+  for (const k in WMS) if (L2[k]) {
+    if (WMS[k].mini) body.append(h('div', { class: 'lgsub', text: WMS[k].n }), WMS[k].mini());
+    else body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline wms' }), h('span', { text: WMS[k].n })));
+  }
   if (msg) body.append(h('div', { class: 'lgmsg', text: msg }));
   legendEl.replaceChildren(head, body);
 }
@@ -17397,7 +17435,7 @@ function openRouteSheet(tab) {
   lay.append(h('div', { class: 'lgline3' }, ...[0, 1, 2].map(s => h('span', null, h('i', { style: `background:${RCOL[s]}` }), RLAB[s]))));
   const wl = h('div', { class: 'list' });
   for (const k in WMS) {
-    const img = WMS[k].legend ? h('div', { class: 'lgimg', hidden: !P.layers[k] }, h('img', { src: WMS[k].legend, alt: 'Légende officielle', loading: 'lazy' })) : null;
+    const img = WMS[k].legend ? h('div', { class: 'lgimg', hidden: !P.layers[k] }, WMS[k].legend()) : null;
     wl.append(switchRow(WMS[k].n, WMS[k].sub, P.layers[k], v => { P.layers[k] = v; persist(); syncWms(); if (img) img.hidden = !v; }));
     if (img) wl.append(img);
   }

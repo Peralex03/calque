@@ -1,5 +1,5 @@
 /* Calque : app disponible hors ligne + cache des tuiles swisstopo consultées. Aucune donnée de plan ne passe ici. */
-const SHELL_CACHE = 'calque-shell-v7';
+const SHELL_CACHE = 'calque-shell-v8';
 const TILE_CACHE = 'calque-tiles';
 const DATA_CACHE = 'calque-data';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
