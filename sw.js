@@ -1,6 +1,7 @@
 /* Calque : app disponible hors ligne + cache des tuiles swisstopo consultées. Aucune donnée de plan ne passe ici. */
-const SHELL_CACHE = 'calque-shell-v5';
+const SHELL_CACHE = 'calque-shell-v6';
 const TILE_CACHE = 'calque-tiles';
+const DATA_CACHE = 'calque-data';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -10,7 +11,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== SHELL_CACHE && k !== TILE_CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== SHELL_CACHE && k !== TILE_CACHE && k !== DATA_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -20,6 +21,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const u = new URL(req.url);
   if (u.hostname === 'wmts.geo.admin.ch') { e.respondWith(tile(req)); return; }
+  if (u.hostname === 'api3.geo.admin.ch' && u.pathname.endsWith('/identify')) { e.respondWith(data(req)); return; }
   if (u.origin === self.location.origin) e.respondWith(shell(req));
 });
 
@@ -33,6 +35,19 @@ async function tile(req) {
     return res;
   } catch (err) {
     try { return await fetch(req); } catch (err2) { return new Response('', { status: 504 }); }
+  }
+}
+
+/* routes et itinéraires des chars : réseau d'abord, dernière réponse gardée pour travailler hors ligne */
+async function data(req) {
+  const cache = await caches.open(DATA_CACHE);
+  try {
+    const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
+    if (res.ok) cache.put(req.url, res.clone());
+    return res;
+  } catch (err) {
+    const hit = await cache.match(req.url);
+    return hit || new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
