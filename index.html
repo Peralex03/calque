@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-l00g5zyIpgI42I2ni0s4HyqFhu3prAyWjO/Pu0vIrzc=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-/7JNeSZaUv/dUOqc3NT6ElTN285LYius7tI+A/aegcQ=' 'sha256-mkX0rK4vdNHLH628sNXlY8IOdEP1NWYPS6ofXUjX09Q='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch https://wms.geo.admin.ch https://api3.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-l00g5zyIpgI42I2ni0s4HyqFhu3prAyWjO/Pu0vIrzc=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-uZMiZWdUKNBXUIWFQviHiPjgh3C7dzJdBXyAsCAsm10=' 'sha256-pNvg+hyYJuFXyxhfGA0E/OleLDLU2W0Ykb8c0o0Zm1E='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch https://wms.geo.admin.ch https://api3.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
@@ -1002,6 +1002,43 @@ input[type=time].field{color-scheme:dark}
 .mt .mtr b{font-weight:600}
 .lgimg{padding:6px 16px 12px;background:var(--card)}
 .lgimg img{max-width:100%;border-radius:8px;background:#fff;padding:6px}
+
+/* --- mode itinéraire : points en haut, résumé en bas --- */
+body.routing .top,body.routing #cross{display:none}
+body.routing .foot{bottom:calc(var(--bar-h) + var(--sa-b) + var(--rc-h,120px) + 18px)}
+.rtop{position:fixed;z-index:850;top:calc(var(--sa-t) + 8px);left:calc(var(--sa-l) + 8px);right:calc(var(--sa-r) + 8px);border-radius:18px;padding:6px;display:flex;flex-direction:column;gap:4px;background:var(--bg);box-shadow:0 0 0 1px var(--edge),0 4px 16px rgba(0,0,0,.3);animation:fadein .25s ease-out}
+@keyframes fadein{from{opacity:0}}
+.rlist{display:flex;flex-direction:column;max-height:calc(48dvh - var(--sa-t));overflow-y:auto;scrollbar-width:none}
+.rrow{position:relative;display:flex;align-items:center;border-radius:12px}
+.rrow+.rrow::before{content:"";position:absolute;left:23px;top:-8px;height:16px;border-left:2px dotted var(--muted);pointer-events:none}
+.rrow.on{background:var(--card)}
+.rmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:7px 10px;text-align:left}
+.rl{flex:1;min-width:0;display:flex;flex-direction:column}
+.rl b{font-size:15px;font-weight:600}
+.rl small{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow.on .rl small{color:var(--text)}
+.rrow.empty .rl small{font-style:normal}
+.rx{flex:none;width:36px;height:36px;margin-right:4px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.rx svg{width:18px;height:18px}
+.racts{display:flex;gap:6px;padding:2px 4px 2px}
+.radd{flex:1;height:36px;border-radius:10px;background:var(--fill);display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;color:var(--text)}
+.radd svg{width:18px;height:18px}
+.rdot.v{background:#F2F2F7;color:var(--mapink)}
+.rpin.v b{background:#fff;color:var(--mapink);border-color:var(--mapink)}
+.rpin.on b{box-shadow:0 0 0 4px rgba(10,132,255,.55),0 1px 4px rgba(0,0,0,.4)}
+.rpin b{width:34px;height:34px;font-size:15px}
+.rcard{position:fixed;z-index:860;left:calc(var(--sa-l) + 8px);right:calc(var(--sa-r) + 8px);bottom:calc(var(--bar-h) + var(--sa-b) + 8px);border-radius:18px;padding:12px 14px 10px;display:flex;flex-direction:column;gap:9px;background:var(--bg);box-shadow:0 0 0 1px var(--edge),0 4px 16px rgba(0,0,0,.3);animation:rise .32s var(--ease)}
+.rhint{font-size:15px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;line-height:1.35}
+.rhint.err{color:#FF8A84;font-size:14px}
+.spin{flex:none;width:18px;height:18px;border-radius:50%;border:2.5px solid var(--fill2);border-top-color:var(--text);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rbig{align-self:flex-start;text-align:left;font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.rchips{display:flex;gap:6px;margin-top:1px}
+.rchip{min-width:0;height:34px;padding:0 12px;border-radius:17px;background:var(--fill);display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text)}
+.rchip:first-child{flex:1}
+.rchip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rchip svg{flex:none;width:18px;height:18px}
+@media (min-width:700px){.rtop,.rcard{left:50%;right:auto;width:600px;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -1036,6 +1073,8 @@ input[type=time].field{color-scheme:dark}
 <section id="sheet" class="sheet" role="dialog" aria-modal="true"></section>
 <div id="dscrim" class="scrim dscrim"></div>
 <div id="dlg" class="dlg" role="alertdialog" aria-modal="true" hidden></div>
+<section id="rtop" class="rtop" hidden aria-label="Points du trajet"></section>
+<section id="rcard" class="rcard" hidden aria-live="polite"></section>
 <div id="legend" class="legend" hidden></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
@@ -14929,9 +14968,17 @@ function createStore(fetchJSON) {
     if (def === DEF_MIL[1]) return String(p.verkehrsbeschraenkung) === '800';
     return true;
   };
-  async function pages(layer, box, def, onPage) {
-    const key = layer + '|' + (def || '') + '|' + box.join(',');
-    if (done.has(key)) return 0;
+  const inflight = new Map();
+  const keyOf = (layer, box, def) => layer + '|' + (def || '') + '|' + box.join(',');
+  function pages(layer, box, def, onPage) {
+    const key = keyOf(layer, box, def);
+    if (done.has(key)) return Promise.resolve(0);
+    if (inflight.has(key)) return inflight.get(key);
+    const pr = fetchAll(layer, box, def, onPage, key).finally(() => inflight.delete(key));
+    inflight.set(key, pr);
+    return pr;
+  }
+  async function fetchAll(layer, box, def, onPage, key) {
     let n = 0;
     for (let off = 0, guard = 0; guard < 60; guard++, off += 200) {
       let j; const withDef = !!def && !noDefs;
@@ -14952,7 +14999,8 @@ function createStore(fetchJSON) {
   }
   const loadRoads = (box, def) => pages(LROAD, box, def, addRoad);
   const loadTanks = box => pages(LTANK, box, null, addTank);
-  return { roads, tanks, loadRoads, loadTanks, get noDefs() { return noDefs; } };
+  const isDone = (layer, box, def) => done.has(keyOf(layer, box, def));
+  return { roads, tanks, loadRoads, loadTanks, isDone, get noDefs() { return noDefs; } };
 }
 
 /* découpe d'une emprise en cases alignées sur une grille (pour réutiliser les cases déjà chargées) */
@@ -14967,18 +15015,24 @@ async function pool(jobs, n, onDone) {
   const run = async () => { while (i < jobs.length) { const j = jobs[i++]; await j(); onDone && onDone(++k, jobs.length); } };
   await Promise.all(Array.from({ length: Math.min(n, jobs.length) }, run));
 }
-/* chargement pour un trajet : réseau principal dans le couloir, réseau local autour du départ et de l'arrivée */
-async function loadCorridor(store, A, B, localR, onProgress, opt) {
-  const d = Math.hypot(B[0] - A[0], B[1] - A[1]), pad = Math.max(4000, d * 0.25) * (opt && opt.wide ? 1.6 : 1);
-  const box = [Math.min(A[0], B[0]) - pad, Math.min(A[1], B[1]) - pad, Math.max(A[0], B[0]) + pad, Math.max(A[1], B[1]) + pad];
-  const jobs = [];
-  for (const t of tiles(box, 10000)) { jobs.push(() => store.loadRoads(t, DEF_MAIN)); for (const def of DEF_MIL) jobs.push(() => store.loadRoads(t, def)); }
-  for (const P of [A, B]) {
-    const lb = [P[0] - localR, P[1] - localR, P[0] + localR, P[1] + localR];
-    for (const t of tiles(lb, 2500)) for (const def of DEF_LOCAL) jobs.push(() => store.loadRoads(t, def));
-  }
-  for (const t of tiles(box, 20000)) jobs.push(() => store.loadTanks(t));
-  await pool(jobs, 6, onProgress);
+/* chargement pour un trajet passant par les points P (MN95) :
+   réseau principal dans un couloir qui suit chaque tronçon, réseau local autour de chaque point,
+   pistes pour chars et routes militaires (chenillés), tonnages publiés (charges lourdes) */
+async function loadCorridor(store, P, o = {}) {
+  const legs = [];
+  for (let i = 1; i < P.length; i++) legs.push([P[i - 1], P[i]]);
+  const padOf = L => Math.max(o.minPad || 2500, Math.hypot(L[1][0] - L[0][0], L[1][1] - L[0][1]) * (o.k || 0.18));
+  const maxPad = Math.max(...legs.map(padOf));
+  const box = [Math.min(...P.map(p => p[0])) - maxPad, Math.min(...P.map(p => p[1])) - maxPad, Math.max(...P.map(p => p[0])) + maxPad, Math.max(...P.map(p => p[1])) + maxPad];
+  const near = (t, size) => { const c = [t[0] + size / 2, t[1] + size / 2], r = size * 0.7072; return legs.some(L => segDist(c, L[0], L[1]).d <= padOf(L) + r); };
+  const jobs = [], R = o.localR || 1500;
+  const keys = new Set();
+  const add = (layer, t, def, fn) => { const k = layer + (def || '') + t.join(); if (!keys.has(k) && !store.isDone(layer, t, def)) { keys.add(k); jobs.push(fn); } };
+  for (const p of P) for (const t of tiles([p[0] - R, p[1] - R, p[0] + R, p[1] + R], 2500)) add(LROAD, t, DEF_LOCAL[0], () => store.loadRoads(t, DEF_LOCAL[0]));
+  for (const t of tiles(box, 5000)) if (near(t, 5000)) add(LROAD, t, DEF_MAIN, () => store.loadRoads(t, DEF_MAIN));
+  if (o.tracked) for (const t of tiles(box, 10000)) if (near(t, 10000)) for (const def of DEF_MIL) add(LROAD, t, def, () => store.loadRoads(t, def));
+  if (o.tanks) for (const t of tiles(box, 20000)) if (near(t, 20000)) add(LTANK, t, null, () => store.loadTanks(t));
+  await pool(jobs, o.conc || 8, o.onProgress);
   return box;
 }
 
@@ -15005,23 +15059,36 @@ function buildGraph(store, box, C) {
     }
   }
   // tonnages publiés des itinéraires de chars : rattachés au tronçon le plus proche (40 m au plus)
+  const grid = new Map(), CELL = 500;
+  edges.forEach((e, i) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const c of e.pts) { if (c[0] < x0) x0 = c[0]; if (c[0] > x1) x1 = c[0]; if (c[1] < y0) y0 = c[1]; if (c[1] > y1) y1 = c[1]; }
+    for (let gx = Math.floor(x0 / CELL); gx <= Math.floor(x1 / CELL); gx++) for (let gy = Math.floor(y0 / CELL); gy <= Math.floor(y1 / CELL); gy++) {
+      const k = gx + ',' + gy; let a = grid.get(k); if (!a) grid.set(k, a = []); a.push(i);
+    }
+  });
+  const around = (p, r) => {
+    const out = new Set();
+    for (let gx = Math.floor((p[0] - r) / CELL); gx <= Math.floor((p[0] + r) / CELL); gx++) for (let gy = Math.floor((p[1] - r) / CELL); gy <= Math.floor((p[1] + r) / CELL); gy++) { const a = grid.get(gx + ',' + gy); if (a) for (const i of a) out.add(i); }
+    return out;
+  };
   for (const t of store.tanks.values()) {
     let best = null, bd = 40;
-    for (let i = 0; i < edges.length; i++) {
+    for (const i of around([t.x, t.y], 40)) {
       const pts = edges[i].pts;
-      if (t.x < Math.min(pts[0][0], pts[pts.length - 1][0]) - 2000 || t.x > Math.max(pts[0][0], pts[pts.length - 1][0]) + 2000) continue;
       for (let j = 1; j < pts.length; j++) { const d = segDist([t.x, t.y], pts[j - 1], pts[j]).d; if (d < bd) { bd = d; best = i; } }
     }
     if (best != null) { const e = edges[best]; e.tank = e.tank == null ? t.t : Math.min(e.tank, t.t); e.g.tank = e.tank; }
   }
   for (const e of edges) e.c = classify(e.g, C);
-  return { X, Y, adj, edges, C };
+  return { X, Y, adj, edges, C, around };
 }
 
 /* point le plus proche sur le réseau (en ignorant les tronçons impraticables) */
 function nearest(G, p, maxD = 1500, force) {
   let best = null;
-  for (let i = 0; i < G.edges.length; i++) {
+  const cand = G.around ? G.around(p, maxD) : G.edges.keys();
+  for (const i of cand) {
     const e = G.edges[i]; if (e.c.s === 2 && !(force && e.c.v > 0)) continue;
     let along = 0;
     for (let j = 1; j < e.pts.length; j++) {
@@ -15137,6 +15204,74 @@ function route(G, A, B, opt) {
   }
   nodes.push({ i: steps[steps.length - 1].to, d: dist, deg: 1 });
   return { pts, segs, nodes, len: dist, time, snapA: sa.d, snapB: sb.d, extra };
+}
+
+/* le point p rejoint-il le réseau principal par des routes praticables ? sinon on élargit le réseau local autour de lui */
+const isMain = e => e.g.vbd != null && e.g.vbd < 1000;
+function linked(G, p, opt) {
+  const s = nearest(G, p, 1500, false); if (!s) return false;
+  const ok = e => e.c.s < 2;   // couverture des données : la légalité est jugée par le calcul
+  const e0 = G.edges[s.e]; if (!ok(e0)) return false;
+  if (isMain(e0)) return true;
+  const seen = new Uint8Array(G.X.length), st = [e0.a, e0.b];
+  seen[e0.a] = seen[e0.b] = 1;
+  while (st.length) {
+    const i = st.pop();
+    for (const ei of G.adj[i]) {
+      const e = G.edges[ei]; if (!ok(e)) continue;
+      if (isMain(e)) return true;
+      const j = e.a === i ? e.b : e.a; if (!seen[j]) { seen[j] = 1; st.push(j); }
+    }
+  }
+  return false;
+}
+async function linkPoint(store, p, C, opt, onProgress) {
+  for (const R of [1250, 2500, 4500, 7000]) {
+    const jobs = [];
+    for (const t of tiles([p[0] - R, p[1] - R, p[0] + R, p[1] + R], 2500)) if (!store.isDone(LROAD, t, DEF_LOCAL[0])) jobs.push(() => store.loadRoads(t, DEF_LOCAL[0]));
+    for (const t of tiles([p[0] - R, p[1] - R, p[0] + R, p[1] + R], 5000)) if (!store.isDone(LROAD, t, DEF_MAIN)) jobs.push(() => store.loadRoads(t, DEF_MAIN));
+    await pool(jobs, 8, onProgress);
+    const box = [p[0] - R - 2500, p[1] - R - 2500, p[0] + R + 2500, p[1] + R + 2500];
+    if (linked(buildGraph(store, box, opt.C), p, opt)) return true;
+  }
+  return false;
+}
+/* calcul complet : couloir principal, accès local de chaque point, puis élargissement si besoin */
+async function planRoute(store, P, opt, onStep = () => {}) {
+  const C = opt.C, base = { tracked: C.tr, tanks: C.tr || C.w > 25 };
+  const prog = (k, n) => onStep(`Chargement des routes ${k}/${n}`);
+  let box = await loadCorridor(store, P, Object.assign({ localR: 1, onProgress: prog }, base));
+  for (const p of P) await linkPoint(store, p, C, opt, prog);
+  onStep('Calcul…'); await new Promise(r => setTimeout(r, 0));
+  let G = buildGraph(store, box, C);
+  if (!G.edges.length) return { err: 'nodata' };
+  let res = routeVia(G, P, opt);
+  if (res.err === 'none') {
+    box = await loadCorridor(store, P, Object.assign({ k: 0.35, minPad: 5000, localR: 1, onProgress: prog }, base));
+    onStep('Calcul…'); await new Promise(r => setTimeout(r, 0));
+    G = buildGraph(store, box, C);
+    res = routeVia(G, P, opt);
+  }
+  let force = false;
+  if (res.err === 'none') { const F = routeVia(G, P, Object.assign({}, opt, { force: true })); if (!F.err) { res = F; force = true; } }
+  if (res.err) return { err: res.err, leg: res.leg };
+  return { R: res, G, force };
+}
+
+/* itinéraire passant par les points P dans l'ordre : tronçons calculés l'un après l'autre */
+function routeVia(G, P, opt) {
+  const out = { pts: [], segs: [], nodes: [], len: 0, time: 0, legs: [] };
+  for (let i = 1; i < P.length; i++) {
+    const r = route(G, P[i - 1], P[i], opt);
+    if (r.err) return { err: r.err, leg: i - 1 };
+    const d0 = out.len, t0 = out.time;
+    out.pts.push(...(out.pts.length ? r.pts.slice(1) : r.pts));
+    for (const s of r.segs) out.segs.push(Object.assign({}, s, { d0: s.d0 + d0, d1: s.d1 + d0, t0: s.t0 + t0, t1: s.t1 + t0 }));
+    for (const n of r.nodes) out.nodes.push(Object.assign({}, n, { d: n.d + d0 }));
+    out.legs.push({ d0, d1: d0 + r.len, t0, t1: t0 + r.time });
+    out.len += r.len; out.time += r.time;
+  }
+  return out;
 }
 
 /* ---------- géométrie le long de l'itinéraire ---------- */
@@ -15256,7 +15391,7 @@ function simplify(pts, eps) {
   return pts.filter((_, i) => keep[i]);
 }
 
-window.ROUTER = { API, LROAD, LTANK, OBJ, VB, VEH, VEH_BY, constraints, classify, createStore, loadCorridor, tiles, pool, buildGraph, nearest, route, waypoints, phaseLines, simplify, cumul, atDist, DEF_MAIN, DEF_LOCAL, DEF_MIL };
+window.ROUTER = { API, LROAD, LTANK, OBJ, VB, VEH, VEH_BY, constraints, classify, createStore, loadCorridor, linkPoint, planRoute, tiles, pool, buildGraph, nearest, route, routeVia, waypoints, phaseLines, simplify, cumul, atDist, DEF_MAIN, DEF_LOCAL, DEF_MIL };
 })();
 </script>
 <script>/* Calque : planification de section sur fond swisstopo, signes du règlement 52.003. Tout reste sur l'appareil. */
@@ -15308,6 +15443,8 @@ const ICONS = {
   dl: '<path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 20h14"/>',
   route: '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/>',
   swap: '<path d="M8 4v15m0 0-3-3m3 3 3-3M16 20V5m0 0-3 3m3-3 3 3"/>',
+  truck: '<path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3.5v2.5h-7"/><circle cx="6.5" cy="17" r="1.8"/><circle cx="16.5" cy="17" r="1.8"/>',
+  list: '<path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.8" cy="6.5" r="1.1" fill="currentColor"/><circle cx="4.8" cy="12" r="1.1" fill="currentColor"/><circle cx="4.8" cy="17.5" r="1.1" fill="currentColor"/>',
   grid: '<rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/>',
 };
 const icon = n => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
@@ -15660,7 +15797,7 @@ map.on('move', () => { if (!coordRaf) coordRaf = requestAnimationFrame(updCoord)
 map.on('moveend', () => { const c = map.getCenter(); cur().view = { c: [round6(c.lat), round6(c.lng)], z: map.getZoom() }; persist(); });
 updCoord();
 coordEl.addEventListener('click', () => { const c = map.getCenter(), [E, N] = toLV95(c.lat, c.lng); copyText(`${Math.round(E)} / ${Math.round(N)}`, 'Coordonnées copiées'); });
-map.on('click', e => { if (mode === 'place') placeAt(e.latlng); else if (mode === 'pick') pickAt(e.latlng); else if (mode === 'idle' && sel) deselect(); });
+map.on('click', e => { if (mode === 'place') placeAt(e.latlng); else if (mode === 'route') rTap(e.latlng); else if (mode === 'idle' && sel) deselect(); });
 
 /* ================= sélection et édition ================= */
 const editEl = $('#edit');
@@ -15945,8 +16082,8 @@ function renderBar() {
   undoBtns = [];
   if (mode === 'place') bar.replaceChildren(btn('Annuler', 'close', endPlace, 'ghost'), btn('Poser ici', 'check', () => placeAt(map.getCenter()), 'primary'));
   else if (mode === 'draw') { const u = btn('Annuler', 'undo', undo); undoBtns.push(u); bar.replaceChildren(u, btn('Terminé', 'check', endDraw, 'primary')); }
-  else if (mode === 'pick') bar.replaceChildren(btn('Annuler', 'close', () => { endPick(); openRoute(); }, 'ghost'), btn(pickWhich === 'a' ? 'Départ ici' : 'Arrivée ici', 'check', () => pickAt(map.getCenter()), 'primary'));
-  else { const u = btn('Annuler', 'undo', undo); undoBtns.push(u); bar.replaceChildren(u, btn('Moyens', 'plus', openAdd), btn('Tracer', 'pen', openTrace), btn('Itinéraire', 'route', () => openRoute()), btn('Partager', 'qr', () => openShare())); }
+  else if (mode === 'route') { const add = btn('Ajouter au plan', 'plus', addRouteToPlan, 'primary'); add.disabled = !rRes || rBusy; bar.replaceChildren(btn('Fermer', 'close', endRoute, 'ghost'), add); }
+  else { const u = btn('Annuler', 'undo', undo); undoBtns.push(u); bar.replaceChildren(u, btn('Moyens', 'plus', openAdd), btn('Tracer', 'pen', openTrace), btn('Itinéraire', 'route', startRoute), btn('Partager', 'qr', () => openShare())); }
   updateUndo();
 }
 
@@ -16216,7 +16353,7 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || !$('#dlg').hidden) return;
   if (sheet.classList.contains('open')) closeSheet();
   else if (mode === 'place') endPlace();
-  else if (mode === 'pick') { endPick(); openRoute(); }
+  else if (mode === 'route') endRoute();
   else if (mode === 'draw') endDraw();
   else if (sel) deselect();
 });
@@ -16429,7 +16566,7 @@ function openMenu() {
     h('div', { class: 'label', text: 'Détail de la carte' }), h('div', { class: 'erow' }, det),
     h('div', { class: 'label', text: 'Taille des signes' }), h('div', { class: 'erow' }, size),
     h('div', { class: 'list' }, wipe),
-    h('p', { class: 'note', html: 'Les plans restent sur ce téléphone. Seules les tuiles de carte et, pour les itinéraires, les routes de la zone du trajet sont chargées depuis geo.admin.ch.<br>Signes : règlement 52.003 « Signes conventionnels » (état 01.12.2019) et MIL-STD-2525C.<br>Carte © swisstopo · milsymbol (MIT) · Leaflet (BSD) · Inter (OFL) · v2.2' }),
+    h('p', { class: 'note', html: 'Les plans restent sur ce téléphone. Seules les tuiles de carte et, pour les itinéraires, les routes de la zone du trajet sont chargées depuis geo.admin.ch.<br>Signes : règlement 52.003 « Signes conventionnels » (état 01.12.2019) et MIL-STD-2525C.<br>Carte © swisstopo · milsymbol (MIT) · Leaflet (BSD) · Inter (OFL) · v2.3' }),
   ]);
 }
 let caching = false;
@@ -16890,11 +17027,11 @@ window.addEventListener('hashchange', checkHash);
 const RT = window.ROUTER;
 const RCOL = ['#1E9E4A', '#F29900', '#E5322D'];   // praticable, à vérifier, impraticable
 const RLAB = ['Praticable', 'À vérifier', 'Impraticable'];
-/* réglages d'itinéraire : remis d'aplomb sur place (le même objet est partagé par le tiroir et le calcul) */
+/* réglages d'itinéraire : remis d'aplomb sur place (le même objet est partagé par les tiroirs et le calcul) */
 const RP = () => {
   let p = store.prefs.route;
   if (!p || typeof p !== 'object' || Array.isArray(p)) p = store.prefs.route = {};
-  const d = { speed: 40, n: 10, gap: 50, pp: 5, lph: 10, doubt: true, dep: '08:00' };
+  const d = { speed: 40, n: 10, gap: 50, doubt: true, dep: '08:00' };
   for (const k in d) if (typeof p[k] !== typeof d[k]) p[k] = d[k];
   if (!Array.isArray(p.veh)) p.veh = ['truck'];
   for (let i = p.veh.length - 1; i >= 0; i--) if (!RT.VEH_BY[p.veh[i]]) p.veh.splice(i, 1);
@@ -16917,6 +17054,22 @@ const fmtKm = m => (m / 1000).toFixed(1).replace('.', ',');
 const fmtDur = hrs => { const m = Math.round(hrs * 60); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`; };
 const hhmm = mins => { const m = ((Math.round(mins) % 1440) + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
 const depMin = () => { const m = /^(\d{1,2}):(\d{2})$/.exec(RP().dep || ''); return m ? +m[1] * 60 + +m[2] : 480; };
+const coordTxt = ll => { const [E, N] = toLV95(ll[0], ll[1]); return `${grp(E)} / ${grp(N)}`; };
+function cDesc(C) { return C.groups.map(g => `${g.tr ? 'chenillés' : 'roues'} ${String(g.w).replace('.', ',')} t, ${String(g.b).replace('.', ',')} m`).join(' · '); }
+
+/* points du trajet, par plan : départ, étapes, arrivée */
+function rPts() {
+  let r = cur().route;
+  if (!r || typeof r !== 'object') r = cur().route = {};
+  if (!Array.isArray(r.pts)) { r.pts = [r.a || null, r.b || null]; delete r.a; delete r.b; }
+  const P = r.pts;   // corrigé sur place : les écouteurs gardent la même liste
+  for (let i = 0; i < P.length; i++) if (!(Array.isArray(P[i]) && P[i].length === 2 && P[i].every(Number.isFinite))) P[i] = null;
+  while (P.length < 2) P.push(null);
+  return P;
+}
+const ptLabel = (i, n) => i === 0 ? 'Départ' : i === n - 1 ? 'Arrivée' : `Étape ${i}`;
+const ptMark = (i, n) => i === 0 ? 'D' : i === n - 1 ? 'A' : String(i);
+const ptCls = (i, n) => i === 0 ? 'a' : i === n - 1 ? 'b' : 'v';
 
 /* ---- couches sur la carte ---- */
 const rPane = map.createPane('route'); rPane.style.zIndex = 380;
@@ -16938,40 +17091,42 @@ function syncWms() {
   }
   updLegend();
 }
-
-/* repères départ / arrivée */
-const rpin = (txt, cls) => L.divIcon({ className: 'rpin ' + cls, html: `<b>${txt}</b>`, iconSize: [30, 30], iconAnchor: [15, 15] });
+const rpin = (txt, cls) => L.divIcon({ className: 'rpin ' + cls, html: `<b>${txt}</b>`, iconSize: [34, 34], iconAnchor: [17, 17] });
 function drawPins() {
   pinLayer.clearLayers();
-  const r = cur().route || {};
-  if (r.a) L.marker(r.a, { icon: rpin('D', 'a'), interactive: false, keyboard: false, zIndexOffset: 500 }).addTo(pinLayer);
-  if (r.b) L.marker(r.b, { icon: rpin('A', 'b'), interactive: false, keyboard: false, zIndexOffset: 500 }).addTo(pinLayer);
+  if (mode !== 'route') return;
+  const P = rPts();
+  P.forEach((ll, i) => {
+    if (!ll) return;
+    const m = L.marker(ll, { icon: rpin(ptMark(i, P.length), ptCls(i, P.length) + (i === rActive ? ' on' : '')), draggable: true, keyboard: false, zIndexOffset: 700, autoPan: true }).addTo(pinLayer);
+    m.on('dragend', () => { const q = m.getLatLng(); P[i] = [round6(q.lat), round6(q.lng)]; persist(); renderRTop(); schedRoute(); });
+    m.on('click', () => { rActive = i; renderRTop(); drawPins(); renderRCard(); });
+  });
 }
 
 /* ---- résultat affiché ---- */
-let rRes = null;   // { R, G, wp, ph, C, opt, force }
+let rRes = null;   // { R, C, opt, force, P }
 function drawRoute() {
   routeLayer.clearLayers();
-  if (!rRes) { updLegend(); return; }
+  if (!rRes || mode !== 'route') { updLegend(); return; }
   const { R } = rRes;
   const ll = R.pts.map(fromXY);
   L.polyline(ll, { renderer: rRend, color: '#fff', weight: 10, opacity: 0.95, interactive: false, lineJoin: 'round' }).addTo(routeLayer);
   L.polyline(ll, { renderer: rRend, color: '#16181B', weight: 7, opacity: 0.9, interactive: false, lineJoin: 'round' }).addTo(routeLayer);
-  // tronçons regroupés par statut
-  const cum = RT.cumul(R.pts);
-  let i0 = 0;
-  const groups = [];
+  const cum = RT.cumul(R.pts), groups = [];
   for (const s of R.segs) { const g = groups[groups.length - 1]; if (g && g.s === s.s) g.d1 = s.d1; else groups.push({ s: s.s, d0: s.d0, d1: s.d1 }); }
   for (const g of groups) {
-    const pts = [];
-    const a = RT.atDist(R.pts, cum, g.d0); pts.push([a.x, a.y]);
-    for (let k = i0; k < R.pts.length; k++) { if (cum[k] > g.d0 && cum[k] < g.d1) pts.push(R.pts[k]); }
-    const b = RT.atDist(R.pts, cum, g.d1); pts.push([b.x, b.y]);
+    const a = RT.atDist(R.pts, cum, g.d0), b = RT.atDist(R.pts, cum, g.d1), pts = [[a.x, a.y]];
+    for (let k = 0; k < R.pts.length; k++) if (cum[k] > g.d0 && cum[k] < g.d1) pts.push(R.pts[k]);
+    pts.push([b.x, b.y]);
     L.polyline(pts.map(fromXY), { renderer: rRend, color: RCOL[g.s], weight: 5, opacity: 1, interactive: false, lineJoin: 'round' }).addTo(routeLayer);
   }
-  for (const p of rRes.ph) L.polyline(p.pts.map(fromXY), { renderer: rRend, color: '#16181B', weight: 2.5, dashArray: '8 6', interactive: false }).addTo(routeLayer);
-  rRes.wp.forEach((w, k) => L.marker(fromXY([w.x, w.y]), { icon: rpin(String(k + 1), 'pp'), interactive: false, keyboard: false, zIndexOffset: 400 }).addTo(routeLayer));
   updLegend();
+}
+function fitRoute() {
+  if (!rRes) return;
+  const top = rtop.hidden ? 0 : rtop.getBoundingClientRect().bottom, bot = rcard.hidden ? 0 : window.innerHeight - rcard.getBoundingClientRect().top;
+  map.fitBounds(L.latLngBounds(rRes.R.pts.map(fromXY).concat(rPts().filter(Boolean))), { paddingTopLeft: [24, top + 16], paddingBottomRight: [24, bot + 16], maxZoom: 16 });
 }
 
 /* ---- praticabilité des routes affichées ---- */
@@ -16986,120 +17141,165 @@ async function refreshAcc() {
   try {
     const b = map.getBounds(), p1 = toXY([b.getSouth(), b.getWest()]), p2 = toXY([b.getNorth(), b.getEast()]);
     const box = [Math.min(p1[0], p2[0]), Math.min(p1[1], p2[1]), Math.max(p1[0], p2[0]), Math.max(p1[1], p2[1])];
-    const jobs = [];
-    for (const t of RT.tiles(box, 10000)) { jobs.push(() => rStore.loadRoads(t, RT.DEF_MAIN)); for (const d of RT.DEF_MIL) jobs.push(() => rStore.loadRoads(t, d)); }
-    if (z >= 14) for (const t of RT.tiles(box, 2500)) for (const d of RT.DEF_LOCAL) jobs.push(() => rStore.loadRoads(t, d));
+    const C = rConstraints(), jobs = [];
+    for (const t of RT.tiles(box, 5000)) jobs.push(() => rStore.loadRoads(t, RT.DEF_MAIN));
+    if (C.tr) for (const t of RT.tiles(box, 10000)) for (const d of RT.DEF_MIL) jobs.push(() => rStore.loadRoads(t, d));
+    if (z >= 14) for (const t of RT.tiles(box, 2500)) jobs.push(() => rStore.loadRoads(t, RT.DEF_LOCAL[0]));
     for (const t of RT.tiles(box, 20000)) jobs.push(() => rStore.loadTanks(t));
     updLegend('Chargement des routes…');
-    await RT.pool(jobs, 6);
+    await RT.pool(jobs, 8);
     if (!RP().layers.acc) return;
-    const G = RT.buildGraph(rStore, box, rConstraints());
+    const G = RT.buildGraph(rStore, box, C);
     accLayer.clearLayers();
-    for (const s of [0, 1, 2]) for (const e of G.edges) if (e.c.s === s) {
-      L.polyline(e.pts.map(fromXY), { renderer: accRend, color: RCOL[s], weight: z >= 15 ? 5 : 4, opacity: 0.9, interactive: false }).addTo(accLayer);
-    }
+    for (const s of [0, 1, 2]) for (const e of G.edges) if (e.c.s === s) L.polyline(e.pts.map(fromXY), { renderer: accRend, color: RCOL[s], weight: z >= 15 ? 5 : 4, opacity: 0.9, interactive: false }).addTo(accLayer);
     updLegend(z < 14 ? 'Réseau principal seulement : zoomer pour les routes locales' : '');
   } catch (e) { updLegend('Données swisstopo indisponibles (hors ligne ?)'); }
   finally { accBusy = false; if (accWant) { accWant = false; refreshAcc(); } }
 }
 map.on('moveend', debounce(() => { if (RP().layers.acc) refreshAcc(); }, 500));
 
-/* ---- légende flottante ---- */
+/* ---- légende flottante (hors mode itinéraire) ---- */
 const legendEl = $('#legend');
 let legendOpen = true;
 function updLegend(msg) {
-  const L2 = RP().layers, show = !!rRes || L2.acc || Object.keys(WMS).some(k => L2[k]);
+  const L2 = RP().layers, show = mode !== 'route' && (L2.acc || Object.keys(WMS).some(k => L2[k]));
   legendEl.hidden = !show;
   if (!show) return;
   const head = h('button', { type: 'button', class: 'lghead' }, h('span', { text: 'Légende' }), iEl(legendOpen ? 'down' : 'right'));
   head.addEventListener('click', () => { legendOpen = !legendOpen; updLegend(msg); });
   const body = h('div', { class: 'lgbody', hidden: !legendOpen });
-  if (rRes || L2.acc) {
-    const C = rConstraints();
-    body.append(h('div', { class: 'lgsub', text: 'Pour ' + cDesc(C) }));
+  if (L2.acc) {
+    body.append(h('div', { class: 'lgsub', text: 'Pour ' + cDesc(rConstraints()) }));
     RLAB.forEach((t, i) => body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline', style: `background:${RCOL[i]}` }), h('span', { text: t }))));
-  }
-  if (rRes && (rRes.wp.length || rRes.ph.length)) {
-    body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgpp', text: '1' }), h('span', { text: 'Point de passage' })));
-    body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline dash' }), h('span', { text: 'Ligne de phase' })));
   }
   for (const k in WMS) if (L2[k]) body.append(h('div', { class: 'lgrow' }, h('i', { class: 'lgline wms' }), h('span', { text: WMS[k].n })));
   if (msg) body.append(h('div', { class: 'lgmsg', text: msg }));
   legendEl.replaceChildren(head, body);
 }
-function cDesc(C) {
-  return C.groups.map(g => `${g.tr ? 'chenillés' : 'roues'} ${String(g.w).replace('.', ',')} t, ${String(g.b).replace('.', ',')} m`).join(' · ');
-}
 
-/* ---- choix du départ et de l'arrivée sur la carte ---- */
-let pickWhich = null;
-function startPick(which) {
+/* ---- mode itinéraire : points en haut, résumé en bas ---- */
+const rtop = $('#rtop'), rcard = $('#rcard');
+let rActive = -1, rBusy = false, rAgain = false, rState = {};
+function startRoute() {
   closeSheet(); if (sel) deselect();
-  pickWhich = which; mode = 'pick';
-  renderBar();
+  if (mode === 'draw') endDraw(); if (mode === 'place') endPlace();
+  mode = 'route'; document.body.classList.add('routing');
+  const P = rPts(); rActive = P.findIndex(x => !x);
+  rtop.hidden = false; rcard.hidden = false;
+  renderRTop(); drawPins(); drawRoute(); renderRCard(); renderBar(); updLegend();
+  if (P.every(Boolean)) { if (rRes && samePts(rRes.P, P)) fitRoute(); else runRoute(true); }
 }
-function endPick() { pickWhich = null; mode = 'idle'; renderBar(); }
-function pickAt(ll) {
-  const r = cur().route = Object.assign({}, cur().route);
-  r[pickWhich] = [round6(ll.lat), round6(ll.lng)];
-  persist(); drawPins();
-  const w = pickWhich; endPick();
-  openRoute(w === 'a' && !r.b ? 'prep' : 'prep');
+function endRoute() {
+  mode = 'idle'; document.body.classList.remove('routing');
+  rtop.hidden = true; rcard.hidden = true; rActive = -1;
+  pinLayer.clearLayers(); routeLayer.clearLayers(); renderBar(); updLegend();
 }
-
-/* ---- calcul ---- */
-async function computeRoute(onStep) {
-  const r = cur().route || {};
-  if (!r.a || !r.b) throw new Error('points');
-  const A = toXY(r.a), B = toXY(r.b), P = RP(), C = rConstraints();
-  const opt = { C, speed: P.speed, doubt: P.doubt };
-  const tryRoute = async (localR, wide) => {
-    const box = await RT.loadCorridor(rStore, A, B, localR, (k, n) => onStep(`Chargement des routes ${k}/${n}`), { wide });
-    onStep('Calcul de l’itinéraire…');
-    await new Promise(res => setTimeout(res, 20));
-    const G = RT.buildGraph(rStore, box, C);
-    if (!G.edges.length) return { G, R: { err: 'nodata' } };
-    return { G, R: RT.route(G, A, B, opt) };
-  };
-  let { G, R } = await tryRoute(2500, false);
-  if (R.err === 'none' || R.err === 'start' || R.err === 'end' || R.err === 'nodata') ({ G, R } = await tryRoute(6000, true));
-  let force = false;
-  if (R.err === 'none') { const F = RT.route(G, A, B, Object.assign({}, opt, { force: true })); if (!F.err) { R = F; force = true; } }
-  if (R.err) return { err: R.err };
-  const wp = P.pp ? RT.waypoints(G, R, P.pp * 1000) : [];
-  const ph = P.lph ? RT.phaseLines(G, R, P.lph * 1000) : [];
-  return { R, G, wp, ph, C, opt, force };
+const samePts = (a, b) => a && b && a.length === b.length && a.every((p, i) => p && b[i] && p[0] === b[i][0] && p[1] === b[i][1]);
+function renderRTop() {
+  const P = rPts(), n = P.length;
+  const list = h('div', { class: 'rlist' });
+  P.forEach((ll, i) => {
+    const on = i === rActive;
+    const main = h('button', { type: 'button', class: 'rmain' }, h('i', { class: 'rdot ' + ptCls(i, n), text: ptMark(i, n) }),
+      h('span', { class: 'rl' }, h('b', { text: ptLabel(i, n) }), h('small', { text: ll ? coordTxt(ll) : on ? 'Touche la carte' : 'À placer' })));
+    main.addEventListener('click', () => { rActive = on ? -1 : i; if (!on && ll) map.panTo(ll); renderRTop(); drawPins(); renderRCard(); });
+    const row = h('div', { class: 'rrow' + (on ? ' on' : '') + (ll ? '' : ' empty') }, main);
+    if (i > 0 && i < n - 1) {
+      const x = h('button', { type: 'button', class: 'rx', 'aria-label': 'Retirer cette étape', html: icon('close') });
+      x.addEventListener('click', () => { P.splice(i, 1); rActive = -1; persist(); renderRTop(); drawPins(); schedRoute(); });
+      row.append(x);
+    }
+    list.append(row);
+  });
+  const add = h('button', { type: 'button', class: 'radd', html: icon('plus') + '<span>Étape</span>' });
+  add.disabled = n >= 8;
+  add.addEventListener('click', () => { P.splice(n - 1, 0, null); rActive = n - 1; persist(); renderRTop(); drawPins(); renderRCard(); });
+  const swap = h('button', { type: 'button', class: 'radd', 'aria-label': 'Inverser le sens', html: icon('swap') + '<span>Inverser</span>' });
+  swap.addEventListener('click', () => { P.reverse(); rActive = P.findIndex(x => !x); persist(); renderRTop(); drawPins(); schedRoute(); });
+  rtop.replaceChildren(list, h('div', { class: 'racts' }, add, swap));
 }
-const timeAt = (R, d) => { for (const s of R.segs) if (d <= s.d1 + 0.01) return s.t0 + (s.t1 - s.t0) * Math.max(0, Math.min(1, (d - s.d0) / ((s.d1 - s.d0) || 1))); return R.time; };
+function rTap(ll) {
+  const P = rPts();
+  if (rActive < 0 || rActive >= P.length) return;
+  P[rActive] = [round6(ll.lat), round6(ll.lng)];
+  rActive = P.findIndex(x => !x);
+  persist(); renderRTop(); drawPins(); renderRCard(); schedRoute();
+}
+function renderRCard() {
+  if (mode !== 'route') return;
+  const P = rPts(), C = rConstraints(), kids = [];
+  const missing = P.findIndex(x => !x);
+  if (rActive >= 0) kids.push(h('div', { class: 'rhint', text: `Touche la carte pour placer ${rActive === 0 ? 'le départ' : rActive === P.length - 1 ? 'l’arrivée' : 'l’étape ' + rActive}` }));
+  else if (missing >= 0) kids.push(h('div', { class: 'rhint', text: `Choisis ${ptLabel(missing, P.length).toLowerCase()} en haut de l’écran` }));
+  else if (rBusy) kids.push(h('div', { class: 'rhint busy' }, h('i', { class: 'spin' }), h('span', { text: rState.msg || 'Calcul…' })));
+  else if (rState.err) kids.push(h('div', { class: 'rhint err', text: rState.err }));
+  else if (rRes) {
+    const R = rRes.R, len = s => R.segs.filter(x => x.s === s).reduce((a, x) => a + x.d1 - x.d0, 0);
+    const bar = h('div', { class: 'statbar' }), runs = [];
+    for (const s of R.segs) { const l = runs[runs.length - 1]; if (l && l.s === s.s) l.len += s.d1 - s.d0; else runs.push({ s: s.s, len: s.d1 - s.d0 }); }
+    for (const x of runs) bar.append(h('i', { style: `flex:${Math.max(0.0001, x.len)};background:${RCOL[x.s]}` }));
+    const big = h('button', { type: 'button', class: 'rbig', text: `${fmtKm(R.len)} km · ${fmtDur(R.time)}`, 'aria-label': 'Voir tout l’itinéraire' });
+    big.addEventListener('click', fitRoute);
+    kids.push(big, bar,
+      h('div', { class: 'lgline3' }, ...[0, 1, 2].filter(s => s === 0 || len(s) > 0).map(s => h('span', null, h('i', { style: `background:${RCOL[s]}` }), `${RLAB[s]} ${fmtKm(len(s))} km`))));
+    if (rRes.force) kids.push(h('div', { class: 'rhint err', text: 'Aucun itinéraire entièrement praticable : meilleur compromis, le rouge bloque.' }));
+  }
+  const moy = h('button', { type: 'button', class: 'rchip', html: icon('truck') + `<span>${cDesc(C)} · ${RP().speed} km/h</span>` });
+  moy.addEventListener('click', () => openRouteSheet('moy'));
+  const det = h('button', { type: 'button', class: 'rchip', html: icon('list') + '<span>Détails</span>' });
+  det.addEventListener('click', () => openRouteSheet('res'));
+  kids.push(h('div', { class: 'rchips' }, moy, det));
+  rcard.replaceChildren(...kids);
+  document.documentElement.style.setProperty('--rc-h', rcard.offsetHeight + 'px');
+}
+const schedRoute = debounce(() => runRoute(false), 300);
+async function runRoute(fit) {
+  if (mode !== 'route') return;
+  const P = rPts();
+  if (P.some(x => !x)) { rRes = null; rState = {}; drawRoute(); renderRCard(); renderBar(); return; }
+  if (rBusy) { rAgain = true; return; }
+  rBusy = true; rState = { msg: 'Chargement des routes…' }; renderRCard();
+  const first = !rRes, snap = P.map(x => x.slice());
+  try {
+    const C = rConstraints(), opt = { C, speed: RP().speed, doubt: RP().doubt };
+    const out = await RT.planRoute(rStore, P.map(toXY), opt, t => { rState.msg = t; renderRCard(); });
+    if (out.err) {
+      rRes = null;
+      const who = out.err === 'start' ? out.leg : out.err === 'end' ? out.leg + 1 : -1;
+      rState = { err: out.err === 'nodata' ? 'Aucune route reçue de swisstopo pour cette zone' : who >= 0 ? `${ptLabel(who, P.length)} trop loin d’une route praticable` : 'Aucun itinéraire trouvé' };
+    } else { rRes = { R: out.R, C, opt, force: out.force, P: snap }; rState = {}; }
+  } catch (e) { rRes = null; rState = { err: 'Données swisstopo indisponibles (hors ligne ?)' }; }
+  finally {
+    rBusy = false; drawRoute(); renderRCard(); renderBar();
+    if ((fit || first) && rRes) fitRoute();
+    if (rAgain) { rAgain = false; runRoute(false); }
+  }
+}
 function marchRows(res) {
-  const P = RP(), R = res.R, dep = depMin(), tail = Math.max(0, (P.n - 1)) * P.gap / (P.speed * 1000 / 60);
-  const pts = [{ k: 'PI', d: 0 }, ...res.wp.map((w, i) => ({ k: `PP ${i + 1}`, d: w.d })), { k: 'PF', d: R.len }];
-  return pts.map(p => { const t = dep + timeAt(R, p.d) * 60; return { k: p.k, km: fmtKm(p.d), head: hhmm(t), tail: hhmm(t + tail) }; });
+  const P = RP(), R = res.R, dep = depMin(), tail = Math.max(0, P.n - 1) * P.gap / (P.speed * 1000 / 60), n = R.legs.length + 1;
+  const pts = [{ k: 'PI · départ', d: 0, t: 0 }, ...R.legs.slice(0, -1).map((l, i) => ({ k: `Étape ${i + 1}`, d: l.d1, t: l.t1 })), { k: 'PF · arrivée', d: R.len, t: R.time }];
+  return pts.slice(0, n).map(p => { const t = dep + p.t * 60; return { k: p.k, km: fmtKm(p.d), head: hhmm(t), tail: hhmm(t + tail) }; });
 }
 function addRouteToPlan() {
   if (!rRes) return;
-  const { R, wp, ph } = rRes;
+  const { R } = rRes;
   pushHist();
   const items = cur().items;
   let eps = 5, line = RT.simplify(R.pts, eps);
   while (line.length > 400 && eps < 200) { eps *= 1.6; line = RT.simplify(R.pts, eps); }
   items.push({ t: 'l', id: uid(), k: 'move', c: 'b', p: line.map(fromXY), o: {} });
-  ph.forEach((p, i) => items.push({ t: 'l', id: uid(), k: 'phase', c: 'k', p: RT.simplify(p.pts, 4).slice(0, 60).map(fromXY), o: { lbl: `LPH ${i + 1}` } }));
-  const sym = (k, xy, o) => { const [lat, lng] = fromXY(xy); items.push({ t: 's', lib: 'ch', id: uid(), k, a: 'f', o: o || {}, n: '', lat, lng }); };
-  sym('pi', R.pts[0]);
-  wp.forEach((w, i) => sym('fixpt', [w.x, w.y], { t: String(i + 1) }));
-  sym('pf', R.pts[R.pts.length - 1]);
-  touch(); render();
-  rRes = null; drawRoute();
+  const sym = (k, xy) => { const [lat, lng] = fromXY(xy); items.push({ t: 's', lib: 'ch', id: uid(), k, a: 'f', o: {}, n: '', lat, lng }); };
+  sym('pi', R.pts[0]); sym('pf', R.pts[R.pts.length - 1]);
+  touch(); endRoute(); render();
   toast('Itinéraire ajouté au plan');
 }
 
-/* ---- tiroir Itinéraire ---- */
-function switchRow(title, sub, on, onChange, extra) {
+/* ---- tiroir : résultat, moyens, calques ---- */
+function switchRow(title, sub, on, onChange) {
   const sw = h('span', { class: 'switch' + (on ? ' on' : ''), role: 'switch', 'aria-checked': String(!!on) });
   const r = h('button', { type: 'button', class: 'row' }, h('div', { class: 't' }, h('b', { text: title }), sub ? h('small', { text: sub }) : null), sw);
   r.addEventListener('click', () => { const v = !sw.classList.contains('on'); sw.classList.toggle('on', v); sw.setAttribute('aria-checked', String(v)); onChange(v); });
-  return extra ? [r, extra] : [r];
+  return r;
 }
 function numField(val, step, onSet, unit) {
   const f = h('input', { class: 'field num', type: 'number', inputmode: 'decimal', step: String(step), min: '0' });
@@ -17108,102 +17308,53 @@ function numField(val, step, onSet, unit) {
   f.addEventListener('keydown', e => { if (e.key === 'Enter') f.blur(); });
   return h('label', { class: 'numf' }, f, h('span', { text: unit }));
 }
-let routeTab = 'prep';
-function openRoute(tab) {
+let routeTab = 'res';
+function openRouteSheet(tab) {
   if (tab) routeTab = tab;
   const P = RP();
-  const prep = h('div', { class: 'stack' }), resv = h('div', { class: 'stack' }), lay = h('div', { class: 'stack' });
-  const panes = { prep, res: resv, lay };
-  const seg = segBtns([['prep', 'Préparer'], ['res', 'Résultat'], ['lay', 'Calques']], routeTab, v => { routeTab = v; for (const k in panes) panes[k].hidden = k !== v; sBody.scrollTop = 0; });
+  const res = h('div', { class: 'stack' }), moy = h('div', { class: 'stack' }), lay = h('div', { class: 'stack' });
+  const panes = { res, moy, lay };
+  const seg = segBtns([['res', 'Détails'], ['moy', 'Moyens'], ['lay', 'Calques']], routeTab, v => { routeTab = v; for (const k in panes) panes[k].hidden = k !== v; sBody.scrollTop = 0; });
   for (const k in panes) panes[k].hidden = k !== routeTab;
+  let dirty = false;
 
-  /* moyens */
-  const vlist = h('div', { class: 'list' });
-  const sumEl = h('p', { class: 'note' });
+  /* moyens et marche */
+  const vlist = h('div', { class: 'list' }), sumEl = h('p', { class: 'note' });
   const updSum = () => { sumEl.textContent = 'Valeurs déterminantes : ' + cDesc(rConstraints()) + '. Valeurs indicatives, à ajuster à tes véhicules.'; };
   for (const v of RT.VEH) {
-    const on = P.veh.includes(v.k), ov = P.over[v.k] || {};
-    const w = ov.w || v.w, b = ov.b || v.b;
+    const on = P.veh.includes(v.k), ov = P.over[v.k] || {}, w = ov.w || v.w, b = ov.b || v.b;
     const ck = h('i', { 'data-i': 'check', class: 'ck', html: icon('check') });
     ck.style.visibility = on ? 'visible' : 'hidden';
-    const sub = h('small', { text: `${v.d} · ${v.tr ? 'chenilles' : 'roues'} · ≈ ${String(w).replace('.', ',')} t · ${String(b).replace('.', ',')} m` });
+    const subTxt = () => { const o2 = P.over[v.k] || {}; return `${v.d} · ${v.tr ? 'chenilles' : 'roues'} · ≈ ${String(o2.w || v.w).replace('.', ',')} t · ${String(o2.b || v.b).replace('.', ',')} m`; };
+    const sub = h('small', { text: subTxt() });
     const row = h('button', { type: 'button', class: 'row' }, h('div', { class: 't' }, h('b', { text: v.n }), sub), ck);
     const adj = h('div', { class: 'vadj', hidden: !on },
-      numField(w, 0.5, x => { (P.over[v.k] = P.over[v.k] || {}).w = x; persist(); sub.textContent = `${v.d} · ${v.tr ? 'chenilles' : 'roues'} · ≈ ${String(x).replace('.', ',')} t · ${String((P.over[v.k] || {}).b || v.b).replace('.', ',')} m`; updSum(); }, 't'),
-      numField(b, 0.05, x => { (P.over[v.k] = P.over[v.k] || {}).b = x; persist(); updSum(); }, 'm de large'));
+      numField(w, 0.5, x => { (P.over[v.k] = P.over[v.k] || {}).w = x; persist(); sub.textContent = subTxt(); updSum(); dirty = true; }, 't'),
+      numField(b, 0.05, x => { (P.over[v.k] = P.over[v.k] || {}).b = x; persist(); sub.textContent = subTxt(); updSum(); dirty = true; }, 'm de large'));
     row.addEventListener('click', () => {
       const i = P.veh.indexOf(v.k);
       if (i >= 0) { if (P.veh.length === 1) { toast('Garder au moins un moyen'); return; } P.veh.splice(i, 1); } else P.veh.push(v.k);
       const now = P.veh.includes(v.k); ck.style.visibility = now ? 'visible' : 'hidden'; adj.hidden = !now;
-      persist(); updSum();
-      if (P.layers.acc) refreshAcc();
+      persist(); updSum(); dirty = true;
     });
     vlist.append(row, adj);
   }
   updSum();
-
-  /* trajet */
-  const r = cur().route || {};
-  const ptRow = (which, label) => {
-    const ll = r[which];
-    const txt = ll ? (() => { const [E, N] = toLV95(ll[0], ll[1]); return `${grp(E)} / ${grp(N)}`; })() : 'Choisir sur la carte';
-    const row = h('button', { type: 'button', class: 'row' }, h('i', { class: 'rdot ' + which, text: which === 'a' ? 'D' : 'A' }), h('div', { class: 't' }, h('b', { text: label }), h('small', { text: txt })), h('i', { 'data-i': 'right', class: 'chev', html: icon('right') }));
-    row.addEventListener('click', () => startPick(which));
-    return row;
-  };
-  const swap = h('button', { type: 'button', class: 'row' }, iEl('swap'), h('div', { class: 't' }, h('b', { text: 'Inverser départ et arrivée' })));
-  swap.addEventListener('click', () => { const x = cur().route || {}; cur().route = { a: x.b, b: x.a }; persist(); drawPins(); openRoute('prep'); });
-
-  /* marche */
-  const speed = segBtns([[30, '30'], [40, '40'], [50, '50'], [60, '60 km/h']], P.speed, v => { P.speed = v; persist(); });
+  const speed = segBtns([[30, '30'], [40, '40'], [50, '50'], [60, '60 km/h']], P.speed, v => { P.speed = v; persist(); dirty = true; });
   const dep = h('input', { class: 'field', type: 'time', value: P.dep });
-  dep.addEventListener('change', () => { if (/^\d{1,2}:\d{2}$/.test(dep.value)) { P.dep = dep.value; persist(); } });
-  const pp = segBtns([[0, 'Aucun'], [3, '3 km'], [5, '5 km'], [10, '10 km']], P.pp, v => { P.pp = v; persist(); });
-  const lph = segBtns([[0, 'Aucune'], [5, '5 km'], [10, '10 km'], [20, '20 km']], P.lph, v => { P.lph = v; persist(); });
-  const doubt = toggle('Accepter les tronçons à vérifier', P.doubt, v => { P.doubt = v; persist(); });
-  const go = h('button', { type: 'button', class: 'act primary', html: icon('route') + '<span>Calculer l’itinéraire</span>' });
-  go.addEventListener('click', async () => {
-    const rr = cur().route || {};
-    if (!rr.a || !rr.b) { toast(!rr.a ? 'Choisir le départ' : 'Choisir l’arrivée'); return; }
-    go.disabled = true;
-    const lab = go.querySelector('span');
-    try {
-      const res = await computeRoute(t => { lab.textContent = t; });
-      if (res.err) { toast({ start: 'Départ trop loin d’une route praticable', end: 'Arrivée trop loin d’une route praticable', nodata: 'Aucune route reçue de swisstopo pour cette zone' }[res.err] || 'Aucun itinéraire trouvé'); return; }
-      rRes = res; drawRoute();
-      map.fitBounds(L.latLngBounds(res.R.pts.map(fromXY)).pad(0.12), { paddingBottomRight: [0, Math.round(window.innerHeight * 0.45)], maxZoom: 16 });
-      openRoute('res');
-    } catch (e) { toast('Données swisstopo indisponibles (hors ligne ?)'); }
-    finally { go.disabled = false; lab.textContent = 'Calculer l’itinéraire'; }
-  });
-  prep.append(
-    h('div', { class: 'label', text: 'Moyens engagés' }), vlist, sumEl,
-    h('div', { class: 'label', text: 'Trajet' }), h('div', { class: 'list' }, ptRow('a', 'Départ'), ptRow('b', 'Arrivée'), swap),
+  dep.addEventListener('change', () => { if (/^\d{1,2}:\d{2}$/.test(dep.value)) { P.dep = dep.value; persist(); dirty = true; } });
+  const doubt = toggle('Accepter les tronçons à vérifier', P.doubt, v => { P.doubt = v; persist(); dirty = true; });
+  moy.append(h('div', { class: 'label', text: 'Moyens engagés' }), vlist, sumEl,
     h('div', { class: 'label', text: 'Vitesse de marche' }), h('div', { class: 'erow' }, speed),
     h('div', { class: 'label', text: 'Colonne' }), h('div', { class: 'erow' }, h('span', { class: 'flab', text: 'Départ' }), dep),
-    h('div', { class: 'erow' }, numField(P.n, 1, x => { P.n = Math.round(x); persist(); }, 'véhicules'), numField(P.gap, 5, x => { P.gap = x; persist(); }, 'm d’intervalle')),
-    h('div', { class: 'label', text: 'Points de passage, environ tous les' }), h('div', { class: 'erow' }, pp),
-    h('div', { class: 'label', text: 'Lignes de phase, environ tous les' }), h('div', { class: 'erow' }, lph),
+    h('div', { class: 'erow' }, numField(P.n, 1, x => { P.n = Math.round(x); persist(); dirty = true; }, 'véhicules'), numField(P.gap, 5, x => { P.gap = x; persist(); dirty = true; }, 'm d’intervalle')),
     h('div', { class: 'erow wrap' }, doubt),
-    go,
     h('p', { class: 'note', text: 'Servitudes probables d’après swissTLM3D (classe, revêtement, restrictions) et les itinéraires des chars publiés. À confirmer : ponts, hauteurs, autorisations et carte approuvée du bureau des déplacements des chars.' }));
 
-  /* résultat */
-  if (!rRes) resv.append(h('div', { class: 'empty', text: 'Pas encore d’itinéraire calculé.' }));
+  /* détails du résultat */
+  if (!rRes) res.append(h('div', { class: 'empty', text: rPts().every(Boolean) ? 'Calcul en cours ou impossible.' : 'Place le départ et l’arrivée en haut de l’écran.' }));
   else {
-    const { R, force } = rRes;
-    const len = s => R.segs.filter(x => x.s === s).reduce((a, x) => a + x.d1 - x.d0, 0);
-    const bar = h('div', { class: 'statbar' });
-    const runs = [];
-    for (const s of R.segs) { const l = runs[runs.length - 1]; if (l && l.s === s.s) l.len += s.d1 - s.d0; else runs.push({ s: s.s, len: s.d1 - s.d0 }); }
-    for (const x of runs) bar.append(h('i', { style: `flex:${Math.max(0.0001, x.len)};background:${RCOL[x.s]}` }));
-    resv.append(h('div', { class: 'rsum' },
-      h('div', { class: 'big', text: `${fmtKm(R.len)} km · ${fmtDur(R.time)}` }),
-      h('div', { class: 'note', text: `Pour ${cDesc(rRes.C)}, ${RP().speed} km/h au plus, sans haltes.` }),
-      bar,
-      h('div', { class: 'lgline3' }, ...[0, 1, 2].map(s => h('span', null, h('i', { style: `background:${RCOL[s]}` }), `${RLAB[s]} ${fmtKm(len(s))} km`)))));
-    if (force) resv.append(h('p', { class: 'warn', text: 'Aucun itinéraire entièrement praticable : voici le meilleur compromis. Les tronçons en rouge bloquent.' }));
-    // tronçons à vérifier, regroupés
+    const { R } = rRes;
     const issues = [];
     for (const s of R.segs) if (s.s > 0) {
       const last = issues[issues.length - 1];
@@ -17211,10 +17362,12 @@ function openRoute(tab) {
       else issues.push({ s: s.s, d0: s.d0, d1: s.d1, why: s.why.slice(), names: s.name ? [s.name] : [] });
     }
     for (let k = issues.length - 1; k >= 0; k--) if (issues[k].d1 - issues[k].d0 < 30 && issues[k].s < 2) issues.splice(k, 1);
+    res.append(h('div', { class: 'rsum' }, h('div', { class: 'big', text: `${fmtKm(R.len)} km · ${fmtDur(R.time)}` }),
+      h('div', { class: 'note', text: `Pour ${cDesc(rRes.C)}, ${rRes.opt.speed} km/h au plus, sans haltes.` })));
     if (issues.length) {
-      resv.append(h('div', { class: 'label', text: `Tronçons à vérifier (${issues.length})` }));
+      res.append(h('div', { class: 'label', text: `Tronçons à vérifier (${issues.length})` }));
       const list = h('div', { class: 'list' });
-      for (const it of issues.slice(0, 60)) {
+      for (const it of issues.slice(0, 80)) {
         const row = h('button', { type: 'button', class: 'row' }, h('i', { class: 'sdot', style: `background:${RCOL[it.s]}` }),
           h('div', { class: 't' }, h('b', { text: `km ${fmtKm(it.d0)} à ${fmtKm(it.d1)}${it.names.length ? ' · ' + it.names.slice(0, 2).join(', ') : ''}` }), h('small', { class: 'wrap', text: it.why.join(' · ') })));
         row.addEventListener('click', () => {
@@ -17225,46 +17378,45 @@ function openRoute(tab) {
         });
         list.append(row);
       }
-      resv.append(list);
-    }
-    // tableau de marche
+      res.append(list);
+    } else res.append(h('p', { class: 'note', text: 'Aucun tronçon à vérifier selon les données disponibles.' }));
     const rows = marchRows(rRes);
-    resv.append(h('div', { class: 'label', text: `Tableau de marche · ${RP().n} véhicules à ${RP().gap} m` }));
+    res.append(h('div', { class: 'label', text: `Tableau de marche · ${RP().n} véhicules à ${RP().gap} m` }));
     const tbl = h('div', { class: 'list mt' }, h('div', { class: 'mtr head' }, h('span', { text: 'Point' }), h('span', { text: 'km' }), h('span', { text: 'Tête' }), h('span', { text: 'Queue' })));
     for (const x of rows) tbl.append(h('div', { class: 'mtr' }, h('b', { text: x.k }), h('span', { text: x.km }), h('span', { text: x.head }), h('span', { text: x.tail })));
-    resv.append(tbl);
-    const add = h('button', { type: 'button', class: 'act primary', html: icon('plus') + '<span>Ajouter au plan</span>' });
-    add.addEventListener('click', () => { addRouteToPlan(); closeSheet(); });
     const cp = h('button', { type: 'button', class: 'act', html: icon('dup') + '<span>Copier le tableau</span>' });
     cp.addEventListener('click', () => copyText(['Point\tkm\tTête\tQueue', ...rows.map(x => `${x.k}\t${x.km}\t${x.head}\t${x.tail}`)].join('\n'), 'Tableau copié'));
-    const clr = h('button', { type: 'button', class: 'act danger', text: 'Effacer' });
-    clr.addEventListener('click', () => { rRes = null; drawRoute(); openRoute('prep'); });
-    resv.append(add, h('div', { class: 'acts' }, cp, clr),
-      h('p', { class: 'note', text: `Ajouté au plan : l’itinéraire (signe « Mouvement, transport, marche »), le PI, ${rRes.wp.length} point${rRes.wp.length > 1 ? 's' : ''} de passage (« Point fixe » numéroté), le PF et ${rRes.ph.length} ligne${rRes.ph.length > 1 ? 's' : ''} de phase.` }));
+    res.append(tbl, cp, h('p', { class: 'note', text: 'Les points de passage et les lignes de phase se posent à la main (Moyens, Tracer). Les étapes servent de points horaires dans le tableau.' }));
   }
+  const reset = h('button', { type: 'button', class: 'act danger', text: 'Effacer les points du trajet' });
+  reset.addEventListener('click', () => { cur().route = { pts: [null, null] }; rRes = null; rState = {}; persist(); closeSheet(); rActive = 0; renderRTop(); drawPins(); drawRoute(); renderRCard(); renderBar(); });
+  res.append(reset);
 
   /* calques */
-  lay.append(h('div', { class: 'list' }, ...switchRow('Praticabilité pour mes moyens', 'Routes colorées selon les servitudes probables', P.layers.acc, v => { P.layers.acc = v; persist(); refreshAcc(); })));
+  lay.append(h('div', { class: 'list' }, switchRow('Praticabilité pour mes moyens', 'Routes colorées selon les servitudes probables', P.layers.acc, v => { P.layers.acc = v; persist(); refreshAcc(); })));
   lay.append(h('div', { class: 'lgline3' }, ...[0, 1, 2].map(s => h('span', null, h('i', { style: `background:${RCOL[s]}` }), RLAB[s]))));
   const wl = h('div', { class: 'list' });
   for (const k in WMS) {
-    const extra = WMS[k].legend ? h('div', { class: 'lgimg', hidden: !P.layers[k] }, h('img', { src: WMS[k].legend, alt: 'Légende officielle', loading: 'lazy' })) : null;
-    const rows = switchRow(WMS[k].n, WMS[k].sub, P.layers[k], v => { P.layers[k] = v; persist(); syncWms(); if (extra) extra.hidden = !v; });
-    wl.append(...rows);
+    const img = WMS[k].legend ? h('div', { class: 'lgimg', hidden: !P.layers[k] }, h('img', { src: WMS[k].legend, alt: 'Légende officielle', loading: 'lazy' })) : null;
+    wl.append(switchRow(WMS[k].n, WMS[k].sub, P.layers[k], v => { P.layers[k] = v; persist(); syncWms(); if (img) img.hidden = !v; }));
+    if (img) wl.append(img);
   }
   lay.append(h('div', { class: 'label', text: 'Couches officielles (geo.admin.ch)' }), wl,
     h('p', { class: 'note', text: 'Les itinéraires des chars publiés sont partiels : la carte approuvée du bureau des déplacements des chars reste la référence.' }));
 
-  openSheet('Itinéraire', [h('div', { class: 'erow' }, seg), prep, resv, lay], null, 'medium');
+  openSheet('Itinéraire', [h('div', { class: 'erow' }, seg), res, moy, lay], () => {
+    if (dirty && mode === 'route') { renderRCard(); runRoute(false); if (RP().layers.acc) refreshAcc(); }
+    else if (mode === 'route') renderRCard();
+  }, 'medium');
 }
-syncWms(); drawPins();
+syncWms();
 if (RP().layers.acc) setTimeout(refreshAcc, 800);
 
 /* ================= démarrage ================= */
 renderBar(); updPill(); render(); checkHash();
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-if (location.hostname === 'localhost') window.__calque = { map, select: id => select(id), pack, unpack, encodePlan, decodePayload, b64d, store, cur, render, shareFrames, receive, parseCoords, toLV95, fromLV95, openRoute, rRes: () => rRes };
+if (location.hostname === 'localhost') window.__calque = { map, select: id => select(id), pack, unpack, encodePlan, decodePayload, b64d, store, cur, render, shareFrames, receive, parseCoords, toLV95, fromLV95, openRouteSheet, rRes: () => rRes, startRoute, rPts };
 })();
 </script>
 </body>

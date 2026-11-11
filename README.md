@@ -4,7 +4,7 @@ Planification de section sur carte swisstopo. App web autonome : les plans reste
 
 Signes : règlement 52.003 « Signes conventionnels » (Armée suisse) redessinés en SVG, et MIL-STD-2525C (milsymbol). Armes, matériel, postes et obstacles orientables (‰).
 
-Itinéraires : calcul selon les moyens engagés (poids, largeur, roues ou chenilles) sur le réseau swissTLM3D, avec les itinéraires de déplacement des chars publiés (VBS). Servitudes probables seulement : ponts, hauteurs, autorisations et carte approuvée du bureau des déplacements des chars restent à confirmer. Points de passage, lignes de phase et tableau de marche générés automatiquement.
+Itinéraires : calcul selon les moyens engagés (poids, largeur, roues ou chenilles) sur le réseau swissTLM3D, avec les itinéraires de déplacement des chars publiés (VBS). Servitudes probables seulement : ponts, hauteurs, autorisations et carte approuvée du bureau des déplacements des chars restent à confirmer. Départ, étapes et arrivée posés sur la carte, tableau de marche ; points de passage et lignes de phase posés à la main.
 
 Export : KMZ, GeoJSON, GPX, créés sur l'appareil.
 

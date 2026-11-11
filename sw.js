@@ -1,5 +1,5 @@
 /* Calque : app disponible hors ligne + cache des tuiles swisstopo consultées. Aucune donnée de plan ne passe ici. */
-const SHELL_CACHE = 'calque-shell-v6';
+const SHELL_CACHE = 'calque-shell-v7';
 const TILE_CACHE = 'calque-tiles';
 const DATA_CACHE = 'calque-data';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
@@ -38,15 +38,20 @@ async function tile(req) {
   }
 }
 
-/* routes et itinéraires des chars : réseau d'abord, dernière réponse gardée pour travailler hors ligne */
+/* routes et itinéraires des chars : gardés 30 jours sur l'appareil (calcul rapide, utilisable hors ligne) */
+const DATA_TTL = 30 * 864e5;
 async function data(req) {
   const cache = await caches.open(DATA_CACHE);
+  const hit = await cache.match(req.url);
+  if (hit && Date.now() - (+hit.headers.get('x-calque-t') || 0) < DATA_TTL) return hit;
   try {
     const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
-    if (res.ok) cache.put(req.url, res.clone());
+    if (res.ok) {
+      const body = await res.clone().blob(), hd = new Headers({ 'Content-Type': res.headers.get('Content-Type') || 'application/json', 'x-calque-t': String(Date.now()) });
+      cache.put(req.url, new Response(body, { status: 200, headers: hd }));
+    }
     return res;
   } catch (err) {
-    const hit = await cache.match(req.url);
     return hit || new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
   }
 }
