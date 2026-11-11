@@ -1333,34 +1333,20 @@ body.pmopen .tabs{visibility:hidden}
 .row .t small.chkt{color:#FFB340;font-weight:600}
 
 /* écran de démarrage */
-.splash{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;background:#12160E;background-image:linear-gradient(180deg,#2C3523 0%,#181D12 52%,#0F120B 100%);transition:opacity .4s ease,visibility 0s .4s}
+.splash{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;background:#1E201C;transition:opacity .4s ease,visibility 0s .4s}
 .splash.out{opacity:0;visibility:hidden}
 .splash-in{display:flex;flex-direction:column;align-items:center;gap:16px;transform:translateY(-3vh)}
-.splash svg{width:136px;height:136px;display:block;margin-bottom:6px}
-.splash-name{font:700 26px/1 Inter,system-ui,-apple-system,sans-serif;letter-spacing:.36em;margin-left:.36em;color:#ECE5D2}
-.splash-rule{width:36px;height:2px;border-radius:1px;background:#C9A554}
-.splash-sub{font:500 12px/1 Inter,system-ui,-apple-system,sans-serif;letter-spacing:.2em;margin-left:.2em;text-transform:uppercase;color:#9D9884}
+.splash svg{width:104px;height:104px;display:block;margin-bottom:10px}
+.splash-name{font:700 24px/1 Inter,system-ui,-apple-system,sans-serif;letter-spacing:.36em;margin-left:.36em;color:#FFFFFF}
+.splash-rule{width:28px;height:2px;border-radius:1px;background:rgba(255,255,255,.28)}
+.splash-sub{font:500 12px/1 Inter,system-ui,-apple-system,sans-serif;letter-spacing:.2em;margin-left:.2em;text-transform:uppercase;color:#8F928A}
 </style>
 </head>
 <body>
-<div id="splash" class="splash" aria-hidden="true"><div class="splash-in"><svg class="splash-mark" xmlns="http://www.w3.org/2000/svg" viewBox="110 110 830 830">
-  <defs>
-    <radialGradient id="fade" cx="404" cy="800" r="250" gradientUnits="userSpaceOnUse">
-      <stop offset="0.3" stop-color="#E9E2CF" stop-opacity="0.24"/>
-      <stop offset="1" stop-color="#E9E2CF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <g fill="none" stroke="url(#fade)" stroke-width="9" transform="translate(30 0)">
-    <path d="M400 712C470 706 520 750 518 800C516 852 462 884 398 882C334 880 286 846 288 796C290 748 334 718 400 712Z"/>
-    <path d="M404 622C520 612 610 690 606 800C602 912 506 966 396 964C286 962 196 900 200 790C204 684 292 632 404 622Z"/>
-    <path d="M410 528C580 514 708 628 700 800C692 974 548 1050 392 1046C236 1042 104 950 112 778C120 616 244 542 410 528Z"/>
-  </g>
-  <circle cx="374" cy="800" r="50" fill="none" stroke="#C9A554" stroke-width="13"/>
-  <circle cx="374" cy="800" r="13" fill="#C9A554"/>
-  <rect x="360" y="214" width="28" height="588" rx="14" fill="#ECE5D2"/>
-  <path d="M374 150L400 192L374 224L348 192Z" fill="#C9A554"/>
-  <path d="M386 236H860L766 368L860 500H386Z" fill="#ECE5D2"/>
-  <path d="M440 236H476V500H440Z" fill="#C9A554"/>
+<div id="splash" class="splash" aria-hidden="true"><div class="splash-in"><svg class="splash-mark" xmlns="http://www.w3.org/2000/svg" viewBox="182 186 660 660" fill="#FFFFFF">
+  <rect x="292" y="318" width="440" height="294"/>
+  <rect x="292" y="318" width="48" height="522"/>
+  <circle cx="420" cy="224" r="31"/><circle cx="512" cy="224" r="31"/><circle cx="604" cy="224" r="31"/>
 </svg>
 <div class="splash-name">CALQUE</div><div class="splash-rule"></div><div class="splash-sub">Documents de conduite</div></div></div>
 <div id="map"></div>
