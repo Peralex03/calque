@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-OLGdA2ilkaak9ttIir1Z3Kg3m64Bugd8K3vUGdNj0K4=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-9rt1bRLM17fedN1VvILcxvwBeCM3sJeBpsit4SutxLc='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' 'sha256-XapRd47Rk67fl8Cu40kkY64PHR09XZtytHj8F/Q13DA=' 'sha256-GK45n4EYK8nekW6cd7GV3yDMWNby1VpisIWimfG/F4A=' 'sha256-vEDIoVGWI2sjFNsIVvcsoLSZgM1UE7jIUqc0n1/uCFk=' 'sha256-5VGqwdrnBSSr5XmTiKq904DK5SDcjgHSZETiIXly35Y=' 'sha256-OLGdA2ilkaak9ttIir1Z3Kg3m64Bugd8K3vUGdNj0K4=' 'sha256-zbm9aP2s3xQv98sqoEM2t+V51pLB+kwvvbNJGvkn0FY=' 'sha256-D/XKRFQ0oUGgcbPtrTaOmwrUnu4EKIjMZngz1LzcYTs='; style-src 'unsafe-inline'; img-src 'self' data: blob: https://wmts.geo.admin.ch; font-src data:; connect-src 'self' https://wmts.geo.admin.ch https://api3.geo.admin.ch; media-src 'self' blob: mediastream:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light">
@@ -14823,6 +14823,7 @@ function load() {
   P.recent = (Array.isArray(P.recent) ? P.recent : []).filter(x => x && (x.lib === 'nato' ? NATO_BY[x.b] : CH.BY[x.k]));
   if (!COLS.includes(P.color)) P.color = 'b';
   if (!SIZES[P.size]) P.size = 'm';
+  if (P.detail !== 0 && P.detail !== 1) P.detail = 1;
   if (!s.plans[s.cur]) s.cur = Object.keys(s.plans)[0];
   return s;
 }
@@ -14853,12 +14854,14 @@ const pv = cur().view || { c: [46.8, 8.2], z: 8 };
 map.setView(pv.c, pv.z);
 map.addLayer(renderer);
 let baseLayer = null;
+const detail = () => (store.prefs.detail === 0 ? 0 : 1);
 function setBase(k) {
   if (!BASES[k]) k = 'map';
   store.prefs.base = k; persist();
   if (baseLayer) map.removeLayer(baseLayer);
-  const b = BASES[k];
-  baseLayer = L.tileLayer(b.url, { maxNativeZoom: b.maxN, maxZoom: 20, minZoom: 7, bounds: CHB, keepBuffer: 3 }).addTo(map);
+  const b = BASES[k], dz = detail();
+  /* détail +1 : chaque case de 128 px reçoit la tuile du niveau de zoom suivant */
+  baseLayer = L.tileLayer(b.url, { tileSize: 256 >> dz, zoomOffset: dz, maxNativeZoom: b.maxN - dz, maxZoom: 20, minZoom: 7, bounds: CHB, keepBuffer: 3 }).addTo(map);
   $('#baseTag').textContent = b.tag;
 }
 setBase(store.prefs.base);
@@ -15563,6 +15566,7 @@ function openMenu() {
   const off = h('button', { type: 'button', class: 'row' }, iEl('dl'), h('div', { class: 't' }, h('b', { text: 'Garder la zone hors ligne' }), h('small', { text: 'Zone affichée, 3 niveaux de zoom' })));
   off.addEventListener('click', () => cacheArea(off));
   const base = segBtns([['map', 'Carte'], ['grey', 'Grise'], ['photo', 'Photo']], store.prefs.base, v => setBase(v));
+  const det = segBtns([[0, 'Normal'], [1, '+1 échelle']], detail(), v => { store.prefs.detail = v; persist(); setBase(store.prefs.base); });
   const size = segBtns([['s', 'Petits'], ['m', 'Moyens'], ['l', 'Grands']], store.prefs.size, v => { store.prefs.size = v; persist(); render(); });
   const wipe = h('button', { type: 'button', class: 'row danger' }, iEl('trash'), h('div', { class: 't' }, h('b', { text: 'Tout effacer sur cet appareil' })));
   wipe.addEventListener('click', async () => {
@@ -15575,6 +15579,7 @@ function openMenu() {
   openSheet('Menu', [
     h('div', { class: 'list' }, off),
     h('div', { class: 'label', text: 'Fond de carte' }), h('div', { class: 'erow' }, base),
+    h('div', { class: 'label', text: 'Détail de la carte' }), h('div', { class: 'erow' }, det),
     h('div', { class: 'label', text: 'Taille des signes' }), h('div', { class: 'erow' }, size),
     h('div', { class: 'list' }, wipe),
     h('p', { class: 'note', html: 'Les plans restent sur ce téléphone. Seules les tuiles de carte sont chargées depuis swisstopo.<br>Signes : règlement 52.003 « Signes conventionnels » (état 01.12.2019) et MIL-STD-2525C.<br>Carte © swisstopo · milsymbol (MIT) · Leaflet (BSD) · Inter (OFL) · v2.0' }),
@@ -15586,7 +15591,7 @@ async function cacheArea(row) {
   if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) { info.textContent = 'Indisponible ici (ouvre la version en ligne en https)'; return; }
   if (caching) return;
   const b = map.getBounds(), base = BASES[store.prefs.base];
-  const z0 = Math.max(10, map.getZoom());
+  const z0 = Math.min(base.maxN, Math.max(10, map.getZoom()) + detail());
   const tileXY = (lat, lng, z) => { const n = 2 ** z, x = Math.floor((lng + 180) / 360 * n), r = lat * D2R; return [x, Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n)]; };
   let urls = [];
   for (let z1 = Math.min(base.maxN, z0 + 3); z1 >= z0; z1--) {
