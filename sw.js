@@ -1,9 +1,9 @@
 /* Calque : app disponible hors ligne + cache des tuiles swisstopo consultées. Aucune donnée de plan ne passe ici. */
-const SHELL_CACHE = 'calque-shell-v9';
+const SHELL_CACHE = 'calque-shell-v10';
 const TILE_CACHE = 'calque-tiles';
 const DATA_CACHE = 'calque-data';
 const MOD_CACHE = 'calque-mod-v1';   /* modules lourds chargés à la demande : lecture de texte, PDF */
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './favicon-32.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(SHELL_CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
