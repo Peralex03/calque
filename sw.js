@@ -171,7 +171,7 @@ async function data(req) {
 
 /* coquille : toujours le cache de la version acceptée. Le réseau seulement pour un fichier connu que le cache n'a
    pas (icônes, écrans de lancement) : aucune autre adresse de l'hébergeur ne peut être appelée, donc rien n'y part. */
-const KNOWN = /^(index\.html|manifest\.webmanifest|favicon-32\.png|icon-[a-z0-9-]+\.png|splash-\d+x\d+\.png)?$/;
+const KNOWN = /^(index\.html|confidentialite\.html|manifest\.webmanifest|favicon-32\.png|icon-[a-z0-9-]+\.png|splash-\d+x\d+\.png)?$/;
 async function shell(req, rel) {
   const nav = req.mode === 'navigate' && (rel === '' || rel === 'index.html');
   const key = nav ? abs('index.html') : abs(rel);
