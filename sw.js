@@ -7,6 +7,9 @@
    - « hors ligne strict » : plus aucune requête, tout vient des caches.
    Ce fichier ne change pas d'une version de l'app à l'autre : la version (empreintes de index.html et des modules)
    est décrite par version.json, écrit par build.mjs. */
+/* version du code de ce fichier : la page vérifie qu'elle est servie par un service worker qui connaît ce qu'elle
+   demande (2 : réseau routier embarqué) */
+const SW_CODE = 2;
 const SHELL_PREFIX = 'calque-shell-';
 const TILE_CACHE = 'calque-tiles';
 const MOD_CACHE = 'calque-mod-v2';
@@ -80,7 +83,10 @@ async function accept() {
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await current();
-    if (c && await (await caches.open(SHELL_PREFIX + c.build)).match(abs('index.html'))) return;   /* mise à jour de ce seul fichier */
+    /* mise à jour de ce seul fichier : la version acceptée et ses caches ne bougent pas, le nouveau code prend la main
+       tout de suite. Sinon il attendrait que l'app soit fermée partout, ce qui n'arrive presque jamais sur iPhone, et
+       la page à jour serait servie par l'ancien code. */
+    if (c && await (await caches.open(SHELL_PREFIX + c.build)).match(abs('index.html'))) { await self.skipWaiting(); return; }
     const m = await fetchVersion();
     await stage(m);
     await cfgSet('version', JSON.stringify(m)); curP = Promise.resolve(m);
@@ -219,7 +225,7 @@ function precache() {
     for (const k of await cache.keys()) { const rel = k.url.slice(SCOPE.length); const r = await cache.match(k); if (!r || !own(cur.mods, rel) || r.headers.get('x-calque-h') !== cur.mods[rel]) await cache.delete(k); }
   })().finally(() => { preP = null; }));
 }
-const status = async () => { const c = await current(), n = await pending(); return { build: c ? c.build : '', next: n ? n.build : '', strict: await strict(), mods: await modsReady(), modsTotal: c ? c.preload.length : 0 }; };
+const status = async () => { const c = await current(), n = await pending(); return { sw: SW_CODE, build: c ? c.build : '', next: n ? n.build : '', strict: await strict(), mods: await modsReady(), modsTotal: c ? c.preload.length : 0 }; };
 
 /* ---------- ordres de la page ---------- */
 self.addEventListener('message', e => {
@@ -231,5 +237,6 @@ self.addEventListener('message', e => {
   else if (d.t === 'accept') e.waitUntil(accept().then(status).then(reply));
   else if (d.t === 'check') e.waitUntil(check().then(status).then(reply));
   else if (d.t === 'status') e.waitUntil(status().then(reply));
+  else if (d.t === 'skip') e.waitUntil(self.skipWaiting().then(status).then(reply));
   else if (d.t === 'precache') e.waitUntil(strict().then(s => s ? null : precache()).then(status).then(reply));
 });
