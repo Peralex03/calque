@@ -151,8 +151,16 @@ async function tile(req) {
   } catch (err) { return new Response('', { status: 504 }); }
 }
 
-/* routes et itinéraires des chars : gardés 30 jours sur l'appareil (calcul rapide, utilisable hors ligne) */
-const DATA_TTL = 30 * 864e5;
+/* routes et itinéraires des chars : gardés 30 jours sur l'appareil (calcul rapide, utilisable hors ligne),
+   2500 réponses au plus : au-delà, les plus anciennes partent */
+const DATA_TTL = 30 * 864e5, DATA_MAX = 2500;
+let dputs = 0;
+async function trimData(cache) {
+  if (++dputs % 50) return;
+  const keys = await cache.keys();
+  if (keys.length <= DATA_MAX) return;
+  for (const k of keys.slice(0, keys.length - DATA_MAX + 200)) await cache.delete(k);
+}
 async function data(req) {
   const cache = await caches.open(DATA_CACHE);
   const hit = await cache.match(req.url);
@@ -163,7 +171,7 @@ async function data(req) {
     const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
     if (res.ok) {
       const body = await res.clone().blob(), hd = new Headers({ 'Content-Type': res.headers.get('Content-Type') || 'application/json', 'x-calque-t': String(Date.now()) });
-      cache.put(req.url, new Response(body, { status: 200, headers: hd })).catch(() => {});
+      cache.put(req.url, new Response(body, { status: 200, headers: hd })).then(() => trimData(cache)).catch(() => {});
     }
     return res;
   } catch (err) { return hit || off(); }
