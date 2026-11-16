@@ -9,7 +9,6 @@
    est décrite par version.json, écrit par build.mjs. */
 const SHELL_PREFIX = 'calque-shell-';
 const TILE_CACHE = 'calque-tiles';
-const DATA_CACHE = 'calque-data';
 const MOD_CACHE = 'calque-mod-v2';
 const CFG_CACHE = 'calque-cfg';
 const ASSETS = ['./manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './favicon-32.png'];
@@ -53,7 +52,7 @@ async function stage(m) {
 }
 async function cleanup() {
   const c = await current(), n = await pending();
-  const keep = new Set([TILE_CACHE, DATA_CACHE, MOD_CACHE, CFG_CACHE]);
+  const keep = new Set([TILE_CACHE, MOD_CACHE, CFG_CACHE, NET_CACHE]);   /* l'ancien cache des routes de l'API part au ménage */
   if (c) keep.add(SHELL_PREFIX + c.build);
   if (n) keep.add(SHELL_PREFIX + n.build);
   for (const k of await caches.keys()) if (k.startsWith('calque-') && !keep.has(k)) await caches.delete(k);
@@ -100,7 +99,6 @@ function egress(u) {
   if (u.hostname === 'wmts.geo.admin.ch') return u.pathname.startsWith('/1.0.0/') && !u.search ? 'tile' : '';
   if (u.hostname === 'wms.geo.admin.ch') return 'wms';
   if (u.hostname === 'api3.geo.admin.ch') {
-    if (u.pathname === '/rest/services/api/MapServer/identify') return 'data';
     if (u.pathname === '/rest/services/api/SearchServer') return 'search';
   }
   return '';
@@ -114,14 +112,14 @@ self.addEventListener('fetch', e => {
   if (u.origin !== self.location.origin) {
     const kind = egress(u);
     if (kind === 'tile') e.respondWith(tile(req));
-    else if (kind === 'data') e.respondWith(data(req));
     else if (kind === 'wms' || kind === 'search') e.respondWith(pass(req));
     else e.respondWith(Response.error());
     return;
   }
   if (!req.url.startsWith(SCOPE)) { e.respondWith(Response.error()); return; }
   const rel = u.pathname.slice(new URL(SCOPE).pathname.length);
-  if (/^(ocr|pdf)\//.test(rel)) { e.respondWith(mod(rel)); return; }
+  if (/^(ocr|pdf)\//.test(rel) || rel === 'net/index.json' || rel === 'net/fond.bin') { e.respondWith(mod(rel)); return; }
+  if (NET_TILE.test(rel)) { e.respondWith(netTile(rel, u.searchParams.get('h') || '')); return; }
   e.respondWith(shell(req, rel));
 });
 
@@ -151,32 +149,6 @@ async function tile(req) {
   } catch (err) { return new Response('', { status: 504 }); }
 }
 
-/* routes et itinéraires des chars : gardés 30 jours sur l'appareil (calcul rapide, utilisable hors ligne),
-   2500 réponses au plus : au-delà, les plus anciennes partent */
-const DATA_TTL = 30 * 864e5, DATA_MAX = 2500;
-let dputs = 0;
-async function trimData(cache) {
-  if (++dputs % 50) return;
-  const keys = await cache.keys();
-  if (keys.length <= DATA_MAX) return;
-  for (const k of keys.slice(0, keys.length - DATA_MAX + 200)) await cache.delete(k);
-}
-async function data(req) {
-  const cache = await caches.open(DATA_CACHE);
-  const hit = await cache.match(req.url);
-  const off = () => new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
-  if (await strict()) return hit || off();
-  if (hit && Date.now() - (+hit.headers.get('x-calque-t') || 0) < DATA_TTL) return hit;
-  try {
-    const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
-    if (res.ok) {
-      const body = await res.clone().blob(), hd = new Headers({ 'Content-Type': res.headers.get('Content-Type') || 'application/json', 'x-calque-t': String(Date.now()) });
-      cache.put(req.url, new Response(body, { status: 200, headers: hd })).then(() => trimData(cache)).catch(() => {});
-    }
-    return res;
-  } catch (err) { return hit || off(); }
-}
-
 /* coquille : toujours le cache de la version acceptée. Le réseau seulement pour un fichier connu que le cache n'a
    pas (icônes, écrans de lancement) : aucune autre adresse de l'hébergeur ne peut être appelée, donc rien n'y part. */
 const KNOWN = /^(index\.html|confidentialite\.html|manifest\.webmanifest|favicon-32\.png|icon-[a-z0-9-]+\.png|splash-\d+x\d+\.png)?$/;
@@ -191,8 +163,28 @@ async function shell(req, rel) {
   catch (err) { return new Response('', { status: 504 }); }
 }
 
+/* réseau routier, cases locales : la page annonce l'empreinte que l'index (lui-même vérifié) donne à la case ;
+   la case n'est rendue que si elle y correspond, puis gardée. Rien d'autre que ce fichier n'est demandé. */
+const NET_TILE = /^net\/l\/-?\d+_-?\d+\.bin$/, NET_CACHE = 'calque-net-v1';
+async function netTile(rel, want) {
+  if (!/^[A-Za-z0-9+/]{43}=$/.test(want)) return new Response('', { status: 403, statusText: 'empreinte' });
+  const cache = await caches.open(NET_CACHE), key = abs(rel);
+  const hit = await cache.match(key);
+  if (hit && hit.headers.get('x-calque-h') === want) return hit;
+  if (await strict()) return new Response('', { status: 504 });
+  let res;
+  try { res = await fetch(key, { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' }); }
+  catch (err) { return new Response('', { status: 504 }); }
+  if (!res.ok) return new Response('', { status: res.status });
+  const buf = await res.arrayBuffer();
+  if (await sha(buf) !== want) return new Response('', { status: 502, statusText: 'integrite' });
+  const hd = { 'Content-Type': 'application/octet-stream', 'x-calque-h': want };
+  cache.put(key, new Response(buf, { status: 200, headers: hd })).catch(() => {});
+  return new Response(buf, { status: 200, headers: hd });
+}
+
 /* modules de lecture : seuls les fichiers prévus par le build, et seulement si leur empreinte est la bonne */
-const modType = rel => rel.endsWith('.js') ? 'application/javascript' : 'application/octet-stream';
+const modType = rel => rel.endsWith('.js') ? 'application/javascript' : rel.endsWith('.json') ? 'application/json' : 'application/octet-stream';
 async function mod(rel) {
   const cur = await current(), want = cur && own(cur.mods, rel) ? cur.mods[rel] : null;
   if (typeof want !== 'string') return new Response('', { status: 403, statusText: 'module inconnu' });
