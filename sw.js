@@ -136,21 +136,67 @@ async function pass(req) {
   catch (err) { return new Response('', { status: 504 }); }
 }
 
-let puts = 0;
-async function trimTiles(cache) {
-  if (++puts % 100) return;
-  const keys = await cache.keys();
-  if (keys.length <= TILE_MAX) return;
-  for (const k of keys.slice(0, keys.length - TILE_MAX + 200)) await cache.delete(k);   /* les plus anciennes d'abord */
+/* tuiles : cache borné, sans embouteillage. Une écriture ou une suppression bloque le cache le temps qu'elle dure :
+   un seul écrivain à la fois, en file, et les lectures des tuiles affichées passent entre deux. Le cache est compté une
+   fois par réveil, puis tenu à jour ; au-delà de TILE_MAX, les plus anciennes partent d'un coup jusqu'à TILE_KEEP, par
+   petits paquets, un seul ménage à la fois (avant : un ménage complet toutes les 100 tuiles, qui se chevauchaient et
+   figeaient la carte sur grand écran). */
+const TILE_KEEP = 7000;
+let tileN = -1, countP = null, trimming = false;
+const wq = [];
+let wBusy = false;
+function wqPush(job, force) {
+  if (!force && wq.length >= 1000) return false;   /* garder en cache n'est qu'un plus : au-delà, on laisse passer */
+  wq.push(job);
+  if (!wBusy) wqRun();
+  return true;
 }
+async function wqRun() {
+  wBusy = true;
+  while (wq.length) { const job = wq.shift(); try { await job(); } catch (e) {} }
+  wBusy = false;
+}
+const tilesCounted = cache => countP || (countP = cache.keys().then(k => { tileN = k.length; }, () => { tileN = 0; }));
+async function trimTiles(cache) {
+  if (trimming || tileN <= TILE_MAX) return;
+  trimming = true;
+  try {
+    const keys = await cache.keys();
+    tileN = keys.length;
+    const drop = keys.slice(0, Math.max(0, keys.length - TILE_KEEP));   /* les plus anciennes d'abord */
+    for (let i = 0; i < drop.length; i += 25) {
+      const part = drop.slice(i, i + 25);
+      await new Promise(res => wqPush(async () => { try { await Promise.all(part.map(k => cache.delete(k))); tileN -= part.length; } finally { res(); } }, true));
+    }
+  } catch (e) {} finally { trimming = false; }
+}
+/* keep : tuile demandée par « Garder la zone hors ligne » (en-tête x-calque-keep) : rangée avant la réponse, jamais
+   laissée de côté, pour que la zone annoncée gardée le soit vraiment. Les tuiles de la carte affichée, elles, partent
+   tout de suite vers la page ; leur rangement suit dans la file. */
 async function tile(req) {
   const cache = await caches.open(TILE_CACHE);
   const hit = await cache.match(req.url);
   if (hit) return hit;
   if (await strict()) return new Response('', { status: 504 });
+  const keep = req.headers.get('x-calque-keep') === '1';
   try {
-    const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
-    if (res.ok) cache.put(req.url, res.clone()).then(() => trimTiles(cache)).catch(() => {});
+    /* une tuile que la page ne veut plus (carte déplacée) n'est pas téléchargée jusqu'au bout */
+    const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', signal: keep ? undefined : req.signal });
+    if (res.ok) {
+      const copy = res.clone();
+      const put = () => new Promise(done => {
+        const queued = wqPush(async () => {
+          try {
+            await tilesCounted(cache);
+            await cache.put(req.url, copy);
+            tileN++;
+            if (tileN > TILE_MAX) trimTiles(cache);   /* sans attendre : le ménage passe lui-même par la file */
+          } finally { done(); }
+        }, keep);
+        if (!queued) done();
+      });
+      if (keep) await put(); else put();
+    }
     return res;
   } catch (err) { return new Response('', { status: 504 }); }
 }
