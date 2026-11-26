@@ -11,11 +11,11 @@
    demande (2 : réseau routier embarqué) */
 const SW_CODE = 2;
 const SHELL_PREFIX = 'calque-shell-';
-const TILE_CACHE = 'calque-tiles';
+const TILE_CACHE = 'calque-tiles', TILE_CACHE2 = 'calque-tiles-b';   /* deux générations de tuiles, voir tile() */
 const MOD_CACHE = 'calque-mod-v2';
 const CFG_CACHE = 'calque-cfg';
 const ASSETS = ['./manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './favicon-32.png'];
-const TILE_MAX = 8000;
+const TILE_MAX = 8000, TILE_GEN = TILE_MAX / 2;
 const SCOPE = self.registration.scope;
 const abs = p => new URL(p, SCOPE).href;
 const sha = async buf => { const b = new Uint8Array(await crypto.subtle.digest('SHA-256', buf)); let s = ''; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); };
@@ -55,7 +55,7 @@ async function stage(m) {
 }
 async function cleanup() {
   const c = await current(), n = await pending();
-  const keep = new Set([TILE_CACHE, MOD_CACHE, CFG_CACHE, NET_CACHE]);   /* l'ancien cache des routes de l'API part au ménage */
+  const keep = new Set([TILE_CACHE, TILE_CACHE2, MOD_CACHE, CFG_CACHE, NET_CACHE]);   /* l'ancien cache des routes de l'API part au ménage */
   if (c) keep.add(SHELL_PREFIX + c.build);
   if (n) keep.add(SHELL_PREFIX + n.build);
   for (const k of await caches.keys()) if (k.startsWith('calque-') && !keep.has(k)) await caches.delete(k);
@@ -136,13 +136,17 @@ async function pass(req) {
   catch (err) { return new Response('', { status: 504 }); }
 }
 
-/* tuiles : cache borné, sans embouteillage. Une écriture ou une suppression bloque le cache le temps qu'elle dure :
-   un seul écrivain à la fois, en file, et les lectures des tuiles affichées passent entre deux. Le cache est compté une
-   fois par réveil, puis tenu à jour ; au-delà de TILE_MAX, les plus anciennes partent d'un coup jusqu'à TILE_KEEP, par
-   petits paquets, un seul ménage à la fois (avant : un ménage complet toutes les 100 tuiles, qui se chevauchaient et
-   figeaient la carte sur grand écran). */
-const TILE_KEEP = 7000;
-let tileN = -1, countP = null, trimming = false;
+/* tuiles : cache borné, sans embouteillage. Sur un ordinateur (grand écran, détail fin), la carte demande des
+   centaines de tuiles par geste ; chaque écriture ou suppression bloque le cache le temps qu'elle dure.
+   - Deux générations : les nouvelles tuiles vont dans la génération en cours ; quand elle atteint TILE_GEN tuiles,
+     l'autre (la plus ancienne) est supprimée d'un bloc et devient la génération en cours, vide. Au plus TILE_MAX
+     tuiles, sans jamais supprimer les tuiles une à une (avant : une lecture complète et des centaines de suppressions
+     toutes les 100 tuiles, qui se chevauchaient et figeaient la carte par à-coups).
+   - Un seul écrivain à la fois, en file : les lectures des tuiles affichées passent entre deux écritures. */
+const GEN = [TILE_CACHE, TILE_CACHE2];
+let genP = null, genN = -1;
+/* génération en cours : son rang (0 ou 1), gardé entre deux réveils */
+const genCur = () => genP || (genP = cfgGet('tileGen').then(v => (v === '1' ? 1 : 0)));
 const wq = [];
 let wBusy = false;
 function wqPush(job, force) {
@@ -156,26 +160,26 @@ async function wqRun() {
   while (wq.length) { const job = wq.shift(); try { await job(); } catch (e) {} }
   wBusy = false;
 }
-const tilesCounted = cache => countP || (countP = cache.keys().then(k => { tileN = k.length; }, () => { tileN = 0; }));
-async function trimTiles(cache) {
-  if (trimming || tileN <= TILE_MAX) return;
-  trimming = true;
-  try {
-    const keys = await cache.keys();
-    tileN = keys.length;
-    const drop = keys.slice(0, Math.max(0, keys.length - TILE_KEEP));   /* les plus anciennes d'abord */
-    for (let i = 0; i < drop.length; i += 25) {
-      const part = drop.slice(i, i + 25);
-      await new Promise(res => wqPush(async () => { try { await Promise.all(part.map(k => cache.delete(k))); tileN -= part.length; } finally { res(); } }, true));
-    }
-  } catch (e) {} finally { trimming = false; }
+/* range une tuile (dans la file) ; passe à l'autre génération quand celle-ci est pleine */
+async function tilePut(url, res) {
+  let g = await genCur(), cache = await caches.open(GEN[g]);
+  if (genN < 0) { try { genN = (await cache.keys()).length; } catch (e) { genN = 0; } }
+  if (genN >= TILE_GEN) {
+    g = 1 - g;
+    await caches.delete(GEN[g]);
+    await cfgSet('tileGen', String(g));
+    genP = Promise.resolve(g); genN = 0;
+    cache = await caches.open(GEN[g]);
+  }
+  await cache.put(url, res);
+  genN++;
 }
 /* keep : tuile demandée par « Garder la zone hors ligne » (en-tête x-calque-keep) : rangée avant la réponse, jamais
    laissée de côté, pour que la zone annoncée gardée le soit vraiment. Les tuiles de la carte affichée, elles, partent
    tout de suite vers la page ; leur rangement suit dans la file. */
 async function tile(req) {
-  const cache = await caches.open(TILE_CACHE);
-  const hit = await cache.match(req.url);
+  const g = await genCur();
+  const hit = await (await caches.open(GEN[g])).match(req.url) || await (await caches.open(GEN[1 - g])).match(req.url);
   if (hit) return hit;
   if (await strict()) return new Response('', { status: 504 });
   const keep = req.headers.get('x-calque-keep') === '1';
@@ -184,17 +188,7 @@ async function tile(req) {
     const res = await fetch(req.url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', signal: keep ? undefined : req.signal });
     if (res.ok) {
       const copy = res.clone();
-      const put = () => new Promise(done => {
-        const queued = wqPush(async () => {
-          try {
-            await tilesCounted(cache);
-            await cache.put(req.url, copy);
-            tileN++;
-            if (tileN > TILE_MAX) trimTiles(cache);   /* sans attendre : le ménage passe lui-même par la file */
-          } finally { done(); }
-        }, keep);
-        if (!queued) done();
-      });
+      const put = () => new Promise(done => { if (!wqPush(() => tilePut(req.url, copy).finally(done), keep)) done(); });
       if (keep) await put(); else put();
     }
     return res;
